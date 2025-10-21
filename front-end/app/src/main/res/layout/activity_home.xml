@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Home"
+    android:orientation="vertical"
+    android:background="#EE82EE">
+    
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Welcome to Home"
+        android:layout_gravity="center"
+        android:textSize="24sp"
+        />
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="304dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginVertical="12dp"
+        android:src="@drawable/adachi" />
+    <!-- Username -->
+    <TextView
+        android:id="@+id/profile_username"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Username"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:layout_gravity="center"
+        android:layout_marginBottom="24dp" />
+
+    <!-- Extra Info (Email, Bio, etc.) -->
+
+    <TextView
+        android:id="@+id/profile_bio"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="The fog is coming..."
+        android:textSize="16sp"
+        android:gravity="center"
+        android:layout_marginBottom="24dp" />
+
+    <!-- Next Page -->
+    <Button
+        android:id="@+id/nextButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Next Page" />
+
+    <!-- User Management (admin only) -->
+    <Button
+        android:id="@+id/userManagementButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="User Account Management"
+        android:visibility="gone" />
+
+    <!-- Logout Button -->
+    <Button
+        android:id="@+id/logoutButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Logout" />
+</LinearLayout>
