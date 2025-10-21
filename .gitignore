@@ -1,16 +1,66 @@
-# Compiled class file
+# ===== RhythmHub Android Project .gitignore =====
+
+# ===== Gradle Build Files =====
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+/captures
+.externalNativeBuild
+.cxx
+local.properties
+
+# ===== Android Studio / IntelliJ IDEA =====
+*.iml
+.idea/
+*.iws
+*.ipr
+.idea/caches/
+.idea/libraries/
+.idea/modules.xml
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/.name
+.idea/compiler.xml
+.idea/copyright/profiles_settings.xml
+.idea/encodings.xml
+.idea/misc.xml
+.idea/modules.xml
+.idea/scopes/scope_settings.xml
+.idea/vcs.xml
+*.hprof
+
+# ===== Android Generated Files =====
+bin/
+gen/
+out/
+release/
+
+# ===== NDK =====
+obj/
+.externalNativeBuild
+.cxx/
+
+# ===== Google Services =====
+google-services.json
+
+# ===== Keystore Files (NEVER commit these!) =====
+*.jks
+*.keystore
+
+# ===== Compiled Files =====
 *.class
+*.dex
+*.ap_
+*.apk
+*.aab
 
-# Log file
+# ===== Log Files =====
 *.log
+*.hprof
 
-# BlueJ files
-*.ctxt
-
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
-
-# Package Files #
+# ===== Package Files =====
 *.jar
 *.war
 *.nar
@@ -19,9 +69,58 @@
 *.tar.gz
 *.rar
 
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+# ===== OS Generated Files =====
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# ===== Kotlin =====
+.kotlin/
+
+# ===== Virtual Machine Crash Logs =====
 hs_err_pid*
 replay_pid*
 
-# Kotlin Gradle plugin data, see https://kotlinlang.org/docs/whatsnew20.html#new-directory-for-kotlin-data-in-gradle-projects
-.kotlin/
+# ===== BlueJ Files =====
+*.ctxt
+
+# ===== Mobile Tools for Java (J2ME) =====
+.mtj.tmp/
+
+# ===== Local Configuration =====
+local.properties
+
+# ===== ProGuard =====
+proguard/
+
+# ===== Lint =====
+lint/intermediates/
+lint/generated/
+lint/outputs/
+lint/tmp/
+lint-results*.html
+lint-results*.xml
+
+# ===== Android Profiling =====
+*.hprof
+*.ser
+
+# ===== Firebase =====
+firebase-debug.log
+firestore-debug.log
+database-debug.log
+pubsub-debug.log
+
+# ===== Navigation Safe Args =====
+/app/build/generated/source/navigation-args/
+
+# ===== Temporary Files =====
+*.swp
+*~
+*.tmp
+*.bak
+*.orig
