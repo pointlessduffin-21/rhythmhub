@@ -44,15 +44,15 @@ This application follows **MVVM (Model-View-ViewModel)** architecture pattern wi
 app/
 ├── data/                          # Data Layer
 │   ├── model/                     # Data models
-│   │   └── User.kt               # Enhanced with avatarSeed, displayName
+│   │   └── User.kt              
 │   ├── util/                      # Utilities
-│   │   └── UsernameGenerator.kt  # Reddit-style username generation
+│   │   
 │   └── repository/                # Repository pattern
 │       └── UserRepository.kt      # SharedPreferences abstraction
 │
 ├── presentation/                  # Presentation Layer
 │   ├── theme/                     # Material 3 theming
-│   │   ├── Color.kt              # Maimai-inspired color scheme
+│   │   ├── Color.kt              # Color scheme
 │   │   ├── Type.kt               # Typography system
 │   │   └── Theme.kt              # Theme configuration
 │   │
@@ -62,7 +62,7 @@ app/
 │   │   └── GradientBackground.kt
 │   │
 │   ├── onboarding/                # Onboarding feature
-│   │   ├── OnboardingScreen.kt   # 4-page carousel with skip
+│   │   ├── OnboardingScreen.kt   
 │   │   ├── OnboardingPage.kt     # Page data model
 │   │   └── OnboardingViewModel.kt
 │   │
