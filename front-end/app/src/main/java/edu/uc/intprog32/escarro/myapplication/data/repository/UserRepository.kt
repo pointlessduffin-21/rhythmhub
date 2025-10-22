@@ -4,14 +4,8 @@ import android.content.Context
 import android.content.SharedPreferences
 import edu.uc.intprog32.escarro.myapplication.data.model.User
 import org.json.JSONObject
+import androidx.core.content.edit
 
-/**
- * Repository class for managing user data using SharedPreferences.
- * Implements the Repository pattern to abstract data source from ViewModels.
- *
- * This class uses SharedPreferences as required by the assignment specifications
- * to store and retrieve user credentials, authentication state, and preferences.
- */
 class UserRepository(context: Context) {
 
     private val sharedPreferences: SharedPreferences =
@@ -23,17 +17,13 @@ class UserRepository(context: Context) {
         private const val KEY_CURRENT_USER = "current_user"
         private const val KEY_REMEMBER_ME = "remember_me"
         private const val KEY_IS_FIRST_LAUNCH = "is_first_launch"
+        private const val KEY_USER_PROFILES = "user_profiles_json"
     }
 
     init {
-        // Ensure default admin user exists
         ensureAdminExists()
     }
 
-    /**
-     * Ensures the admin user exists in the system.
-     * This is called on initialization to guarantee a default login account.
-     */
     private fun ensureAdminExists() {
         val users = getAllUsers()
         if (!users.containsKey("admin")) {
@@ -43,11 +33,6 @@ class UserRepository(context: Context) {
         }
     }
 
-    /**
-     * Retrieves all users from SharedPreferences.
-     *
-     * @return Map of username to password
-     */
     private fun getAllUsers(): Map<String, String> {
         val jsonString = sharedPreferences.getString(KEY_USERS, "{}") ?: "{}"
         val jsonObject = JSONObject(jsonString)
@@ -60,146 +45,141 @@ class UserRepository(context: Context) {
         return usersMap
     }
 
-    /**
-     * Saves all users to SharedPreferences.
-     *
-     * @param users Map of username to password
-     */
     private fun saveAllUsers(users: Map<String, String>) {
         val jsonObject = JSONObject()
         users.forEach { (username, password) ->
             jsonObject.put(username, password)
         }
 
-        sharedPreferences.edit()
-            .putString(KEY_USERS, jsonObject.toString())
-            .apply()
+        sharedPreferences.edit {
+            putString(KEY_USERS, jsonObject.toString())
+        }
     }
 
-    /**
-     * Registers a new user.
-     *
-     * @param username The desired username
-     * @param password The user's password
-     * @return true if registration successful, false if username already exists
-     */
     fun registerUser(username: String, password: String): Boolean {
         val users = getAllUsers().toMutableMap()
 
-        // Check if username already exists
         if (users.containsKey(username)) {
             return false
         }
 
-        // Add new user
         users[username] = password
         saveAllUsers(users)
         return true
     }
 
-    /**
-     * Validates user credentials.
-     *
-     * @param username The username to validate
-     * @param password The password to check
-     * @return true if credentials are valid, false otherwise
-     */
     fun validateUser(username: String, password: String): Boolean {
         val users = getAllUsers()
         return users[username] == password
     }
 
-    /**
-     * Checks if a username exists in the system.
-     *
-     * @param username The username to check
-     * @return true if username exists, false otherwise
-     */
     fun userExists(username: String): Boolean {
         return getAllUsers().containsKey(username)
     }
 
-    /**
-     * Sets the currently logged-in user.
-     *
-     * @param username The username of the current user
-     */
     fun setCurrentUser(username: String) {
-        sharedPreferences.edit()
-            .putString(KEY_CURRENT_USER, username)
-            .apply()
+        sharedPreferences.edit {
+            putString(KEY_CURRENT_USER, username)
+        }
     }
 
-    /**
-     * Gets the currently logged-in user.
-     *
-     * @return The username of the current user, or null if no user is logged in
-     */
     fun getCurrentUser(): String? {
         return sharedPreferences.getString(KEY_CURRENT_USER, null)
     }
 
-    /**
-     * Clears the current user (logout).
-     */
     fun clearCurrentUser() {
-        sharedPreferences.edit()
-            .remove(KEY_CURRENT_USER)
-            .apply()
+        sharedPreferences.edit {
+            remove(KEY_CURRENT_USER)
+        }
     }
 
-    /**
-     * Sets the "Remember Me" preference.
-     *
-     * @param remember true to remember the user, false otherwise
-     */
     fun setRememberMe(remember: Boolean) {
-        sharedPreferences.edit()
-            .putBoolean(KEY_REMEMBER_ME, remember)
-            .apply()
+        sharedPreferences.edit {
+            putBoolean(KEY_REMEMBER_ME, remember)
+        }
     }
 
-    /**
-     * Gets the "Remember Me" preference.
-     *
-     * @return true if "Remember Me" is enabled, false otherwise
-     */
     fun getRememberMe(): Boolean {
         return sharedPreferences.getBoolean(KEY_REMEMBER_ME, false)
     }
 
-    /**
-     * Checks if this is the first launch of the app.
-     *
-     * @return true if first launch, false otherwise
-     */
     fun isFirstLaunch(): Boolean {
         return sharedPreferences.getBoolean(KEY_IS_FIRST_LAUNCH, true)
     }
 
-    /**
-     * Marks that the onboarding has been completed.
-     */
     fun setOnboardingCompleted() {
-        sharedPreferences.edit()
-            .putBoolean(KEY_IS_FIRST_LAUNCH, false)
-            .apply()
+        sharedPreferences.edit {
+            putBoolean(KEY_IS_FIRST_LAUNCH, false)
+        }
     }
 
-    /**
-     * Checks if user is currently logged in and should be remembered.
-     *
-     * @return true if user should auto-login, false otherwise
-     */
     fun shouldAutoLogin(): Boolean {
         return getRememberMe() && getCurrentUser() != null
     }
 
-    /**
-     * Performs a complete logout, clearing all session data.
-     */
     fun logout() {
         clearCurrentUser()
         setRememberMe(false)
+    }
+
+    fun getUser(username: String): User? {
+        val users = getAllUsers()
+        val password = users[username] ?: return null
+        val profiles = getUserProfiles()
+        val profile = profiles[username] as? Map<String, String>
+
+        return User(
+            username = username,
+            password = password,
+            bio = profile?.get("bio") ?: "",
+            avatarSeed = profile?.get("avatarSeed") ?: username,
+            isAdmin = username == "admin"
+        )
+    }
+
+    fun updateAvatarSeed(username: String, avatarSeed: String) {
+        val profiles = getUserProfiles().toMutableMap()
+        val userProfile = (profiles[username] as? Map<String, String>)?.toMutableMap() ?: mutableMapOf()
+        userProfile["avatarSeed"] = avatarSeed
+        profiles[username] = userProfile
+        saveUserProfiles(profiles)
+    }
+    
+    fun updateBio(username: String, bio: String) {
+        val profiles = getUserProfiles().toMutableMap()
+        val userProfile = (profiles[username] as? Map<String, String>)?.toMutableMap() ?: mutableMapOf()
+        userProfile["bio"] = bio
+        profiles[username] = userProfile
+        saveUserProfiles(profiles)
+    }
+
+    private fun getUserProfiles(): Map<String, Any> {
+        val jsonString = sharedPreferences.getString(KEY_USER_PROFILES, "{}") ?: "{}"
+        val jsonObject = JSONObject(jsonString)
+        val profilesMap = mutableMapOf<String, Any>()
+
+        jsonObject.keys().forEach { key ->
+            val profileJson = jsonObject.getJSONObject(key)
+            val profileData = mutableMapOf<String, String>()
+            profileJson.keys().forEach { profileKey ->
+                profileData[profileKey] = profileJson.optString(profileKey, "")
+            }
+            profilesMap[key] = profileData
+        }
+        return profilesMap
+    }
+
+    private fun saveUserProfiles(profiles: Map<String, Any>) {
+        val jsonObject = JSONObject()
+        profiles.forEach { (username, profileData) ->
+            if (profileData is Map<*, *>) {
+                val profileJson = JSONObject(profileData)
+                jsonObject.put(username, profileJson)
+            }
+        }
+
+        sharedPreferences.edit {
+            putString(KEY_USER_PROFILES, jsonObject.toString())
+        }
     }
 }

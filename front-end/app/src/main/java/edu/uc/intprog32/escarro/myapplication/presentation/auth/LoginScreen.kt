@@ -1,5 +1,6 @@
 package edu.uc.intprog32.escarro.myapplication.presentation.auth
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,18 +12,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.LibraryMusic
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -30,10 +26,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import edu.uc.intprog32.escarro.myapplication.R
 import edu.uc.intprog32.escarro.myapplication.presentation.components.GradientBackground
 import edu.uc.intprog32.escarro.myapplication.presentation.components.RhythmButton
 import edu.uc.intprog32.escarro.myapplication.presentation.components.RhythmOutlinedButton
@@ -84,24 +82,13 @@ fun LoginScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            // Logo - LibraryMusic represents the music/rhythm theme
-            Icon(
-                imageVector = Icons.Default.LibraryMusic,
+            Image(
+                painter = painterResource(id = R.drawable.logo),
                 contentDescription = "RhythmHub Logo",
-                modifier = Modifier.size(80.dp),
-                tint = MaterialTheme.colorScheme.primary
+                modifier = Modifier.size(280.dp) // Increased logo size
             )
 
             Spacer(modifier = Modifier.height(16.dp))
-
-            // App Name
-            Text(
-                text = "RhythmHub",
-                style = MaterialTheme.typography.displaySmall,
-                color = MaterialTheme.colorScheme.onBackground
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
 
             // Subtitle
             Text(

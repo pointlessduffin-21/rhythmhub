@@ -52,6 +52,7 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation("androidx.compose.material:material:1.6.8")
 
     // Material Icons Extended - Contains all Material Design icons
     implementation("androidx.compose.material:material-icons-extended:1.7.6")
@@ -63,6 +64,10 @@ dependencies {
 
     // Navigation Compose
     implementation("androidx.navigation:navigation-compose:2.7.7")
+
+    // Coil for image loading (DiceBear avatars)
+    implementation("io.coil-kt:coil-compose:2.5.0")
+    implementation("io.coil-kt:coil-svg:2.5.0")
 
     // Legacy support (can be removed after full migration)
     implementation(libs.androidx.appcompat)

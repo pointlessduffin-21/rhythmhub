@@ -10,8 +10,7 @@ import edu.uc.intprog32.escarro.myapplication.data.repository.UserRepository
 import edu.uc.intprog32.escarro.myapplication.presentation.auth.AuthViewModel
 import edu.uc.intprog32.escarro.myapplication.presentation.auth.LoginScreen
 import edu.uc.intprog32.escarro.myapplication.presentation.auth.RegisterScreen
-import edu.uc.intprog32.escarro.myapplication.presentation.home.HomeScreen
-import edu.uc.intprog32.escarro.myapplication.presentation.home.HomeViewModel
+import edu.uc.intprog32.escarro.myapplication.presentation.main.MainScreen
 import edu.uc.intprog32.escarro.myapplication.presentation.onboarding.OnboardingScreen
 import edu.uc.intprog32.escarro.myapplication.presentation.onboarding.OnboardingViewModel
 
@@ -27,13 +26,17 @@ object RhythmRoutes {
 
 /**
  * Main navigation graph for RhythmHub application.
- * Implements proper screen navigation as required by the assignment.
+ * Implements proper screen navigation
  *
  * Uses Navigation Compose to handle transitions between:
  * - Onboarding (first launch only)
  * - Login
  * - Registration
- * - Home/Dashboard
+ * - Main Screen with Bottom Navigation:
+ *   - Home/Dashboard
+ *   - Arcade Locator (placeholder)
+ *   - Community Hub (placeholder)
+ *   - Profile/Settings
  *
  * @param navController Navigation controller
  * @param context Application context for Repository initialization
@@ -104,19 +107,15 @@ fun RhythmNavGraph(
             )
         }
 
-        // Home/Dashboard Screen
+        // Main Screen with Bottom Navigation (Home, Arcades, Community, Profile)
         composable(RhythmRoutes.HOME) {
-            val viewModel: HomeViewModel = viewModel(
-                factory = HomeViewModel.Factory(userRepository)
-            )
-
-            HomeScreen(
+            MainScreen(
                 onLogout = {
                     navController.navigate(RhythmRoutes.LOGIN) {
                         popUpTo(0) { inclusive = true }
                     }
                 },
-                viewModel = viewModel
+                userRepository = userRepository
             )
         }
     }

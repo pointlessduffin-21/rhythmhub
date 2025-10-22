@@ -12,6 +12,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -21,6 +22,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -60,12 +62,20 @@ fun RegisterScreen(
     val snackbarHostState = remember { SnackbarHostState() }
 
     // Handle registration success
-    LaunchedEffect(uiState.isSuccess) {
-        if (uiState.isSuccess) {
-            snackbarHostState.showSnackbar("Registration successful! Please login.")
-            viewModel.resetState()
-            onRegistrationSuccess()
-        }
+    if (uiState.isSuccess) {
+        AlertDialog(
+            onDismissRequest = {},
+            title = { Text("Registration Successful") },
+            text = { Text("Your account has been created. Please login to continue.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    viewModel.resetState()
+                    onRegistrationSuccess()
+                }) {
+                    Text("Login")
+                }
+            }
+        )
     }
 
     // Show error snackbar

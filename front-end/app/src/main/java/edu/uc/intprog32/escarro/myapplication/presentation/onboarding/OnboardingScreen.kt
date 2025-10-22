@@ -1,147 +1,212 @@
 package edu.uc.intprog32.escarro.myapplication.presentation.onboarding
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Album
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import edu.uc.intprog32.escarro.myapplication.presentation.components.GradientBackground
 import edu.uc.intprog32.escarro.myapplication.presentation.components.RhythmButton
+import edu.uc.intprog32.escarro.myapplication.presentation.components.RhythmOutlinedButton
 import edu.uc.intprog32.escarro.myapplication.presentation.components.VibrantGradientBackground
+import kotlinx.coroutines.launch
 
 /**
- * Onboarding screen that introduces users to RhythmHub.
- * Displayed on first launch to explain app features.
+ * Onboarding screen with multi-page carousel.
+ * Implements MVP Feature 1: User Onboarding requirement with skippable, visually-guided tour.
  *
- * Implements MVP Feature 1: User Onboarding & Management requirement.
- *
- * @param onContinue Callback when user completes onboarding
+ * @param onContinue Callback when onboarding is completed or skipped
  * @param viewModel ViewModel for onboarding logic
  */
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun OnboardingScreen(
     onContinue: () -> Unit,
     viewModel: OnboardingViewModel = viewModel()
 ) {
+    val pages = listOf(
+        OnboardingPage(
+            title = "Welcome to RhythmHub",
+            description = "Your digital home for Maimai. Manage queues, find arcades, and connect with players!",
+            icon = Icons.Default.MusicNote
+        ),
+        OnboardingPage(
+            title = "Find Arcades",
+            description = "Easily discover nearby arcades with Maimai machines. Never miss a beat!",
+            icon = Icons.Default.LocationOn
+        ),
+        OnboardingPage(
+            title = "Join the Queue",
+            description = "See the live queue and join with a tap. We'll notify you when it's your turn!",
+            icon = Icons.Default.Queue
+        ),
+        OnboardingPage(
+            title = "Connect with Players",
+            description = "Share scores, find partners, and chat with your local Maimai community.",
+            icon = Icons.Default.Group
+        )
+    )
+
+    val pagerState = rememberPagerState(pageCount = { pages.size })
+    val scope = rememberCoroutineScope()
+
     VibrantGradientBackground {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(32.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+                .padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // App Icon/Logo - Album represents music/rhythm games
-            Icon(
-                imageVector = Icons.Default.Album,
-                contentDescription = "RhythmHub Logo",
-                modifier = Modifier.size(120.dp),
-                tint = MaterialTheme.colorScheme.primary
-            )
+            // Skip button
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End
+            ) {
+                TextButton(
+                    onClick = {
+                        viewModel.completeOnboarding()
+                        onContinue()
+                    }
+                ) {
+                    Text(
+                        text = "Skip",
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
+                    )
+                }
+            }
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // App Name
-            Text(
-                text = "RhythmHub",
-                style = MaterialTheme.typography.displayMedium,
-                color = MaterialTheme.colorScheme.onBackground,
-                textAlign = TextAlign.Center
-            )
+            // Horizontal Pager
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier.weight(1f)
+            ) { page ->
+                OnboardingPageContent(pages[page])
+            }
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            // Page Indicators
+            Row(
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                repeat(pages.size) { index ->
+                    Box(
+                        modifier = Modifier
+                            .padding(horizontal = 4.dp)
+                            .size(if (pagerState.currentPage == index) 12.dp else 8.dp)
+                            .clip(CircleShape)
+                            .background(
+                                if (pagerState.currentPage == index)
+                                    MaterialTheme.colorScheme.primary
+                                else
+                                    MaterialTheme.colorScheme.onBackground.copy(alpha = 0.3f)
+                            )
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            // Navigation Buttons
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                // Previous/Back Button
+                if (pagerState.currentPage > 0) {
+                    RhythmOutlinedButton(
+                        text = "Back",
+                        onClick = {
+                            scope.launch {
+                                pagerState.animateScrollToPage(pagerState.currentPage - 1)
+                            }
+                        },
+                        modifier = Modifier.weight(1f)
+                    )
+                } else {
+                    Spacer(modifier = Modifier.weight(1f))
+                }
+
+                Spacer(modifier = Modifier.width(16.dp))
+
+                // Next/Get Started Button
+                RhythmButton(
+                    text = if (pagerState.currentPage == pages.size - 1) "Get Started" else "Next",
+                    onClick = {
+                        if (pagerState.currentPage == pages.size - 1) {
+                            viewModel.completeOnboarding()
+                            onContinue()
+                        } else {
+                            scope.launch {
+                                pagerState.animateScrollToPage(pagerState.currentPage + 1)
+                            }
+                        }
+                    },
+                    modifier = Modifier.weight(1f)
+                )
+            }
 
             Spacer(modifier = Modifier.height(16.dp))
-
-            // Tagline
-            Text(
-                text = "Your Maimai Queue Manager",
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.secondary,
-                textAlign = TextAlign.Center
-            )
-
-            Spacer(modifier = Modifier.height(48.dp))
-
-            // Feature 1
-            OnboardingFeature(
-                title = "Join Digital Queues",
-                description = "See your position in real-time and get notified when it's your turn"
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Feature 2
-            OnboardingFeature(
-                title = "Find Arcades",
-                description = "Locate nearby arcades with Maimai machines"
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Feature 3
-            OnboardingFeature(
-                title = "Connect with Players",
-                description = "Share scores and chat with the local Maimai community"
-            )
-
-            Spacer(modifier = Modifier.height(48.dp))
-
-            // Continue Button
-            RhythmButton(
-                text = "Get Started",
-                onClick = {
-                    viewModel.completeOnboarding()
-                    onContinue()
-                },
-                modifier = Modifier.fillMaxWidth()
-            )
         }
     }
 }
 
 /**
- * Individual feature item for onboarding screen.
+ * Content for a single onboarding page.
  *
- * @param title Feature title
- * @param description Feature description
+ * @param page The onboarding page data
  */
 @Composable
-private fun OnboardingFeature(
-    title: String,
-    description: String
-) {
+private fun OnboardingPageContent(page: OnboardingPage) {
     Column(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.Start
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
-        Text(
-            text = "• $title",
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.primary
+        // Icon
+        Icon(
+            imageVector = page.icon,
+            contentDescription = page.title,
+            modifier = Modifier.size(120.dp),
+            tint = MaterialTheme.colorScheme.primary
         )
 
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(48.dp))
 
+        // Title
         Text(
-            text = description,
-            style = MaterialTheme.typography.bodyMedium,
+            text = page.title,
+            style = MaterialTheme.typography.headlineLarge,
+            color = MaterialTheme.colorScheme.onBackground,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Description
+        Text(
+            text = page.description,
+            style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f),
-            modifier = Modifier.padding(start = 16.dp)
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth()
         )
     }
 }

@@ -1,47 +1,25 @@
 package edu.uc.intprog32.escarro.myapplication.presentation.home
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ExitToApp
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Queue
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
 import edu.uc.intprog32.escarro.myapplication.presentation.components.GradientBackground
-import edu.uc.intprog32.escarro.myapplication.presentation.components.RhythmButton
 import edu.uc.intprog32.escarro.myapplication.presentation.components.RhythmOutlinedButton
 
 /**
@@ -61,6 +39,11 @@ fun HomeScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
+    // Automatically refresh data when the screen is shown
+    LaunchedEffect(Unit) {
+        viewModel.loadUserData()
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -74,20 +57,13 @@ fun HomeScreen(
     ) { paddingValues ->
         GradientBackground {
             if (uiState.isLoading) {
-                // Loading state
                 Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues),
+                    modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(60.dp),
-                        color = MaterialTheme.colorScheme.primary
-                    )
+                    CircularProgressIndicator()
                 }
             } else {
-                // Main content
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
@@ -115,7 +91,7 @@ fun HomeScreen(
                                 .padding(24.dp),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            // Avatar
+                            // Avatar - DiceBear
                             Box(
                                 modifier = Modifier
                                     .size(100.dp)
@@ -123,29 +99,44 @@ fun HomeScreen(
                                     .background(MaterialTheme.colorScheme.primaryContainer),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Icon(
-                                    imageVector = Icons.Default.Person,
-                                    contentDescription = "Profile",
-                                    modifier = Modifier.size(60.dp),
-                                    tint = MaterialTheme.colorScheme.onPrimaryContainer
-                                )
+                                uiState.user?.let { user ->
+                                    AsyncImage(
+                                        model = user.getAvatarUrl(),
+                                        contentDescription = "Profile Avatar",
+                                        modifier = Modifier
+                                            .size(100.dp)
+                                            .clip(CircleShape),
+                                        contentScale = ContentScale.Crop
+                                    )
+                                }
                             }
 
                             Spacer(modifier = Modifier.height(16.dp))
 
                             // Username
                             Text(
-                                text = uiState.username,
+                                text = uiState.user?.username ?: "Guest",
                                 style = MaterialTheme.typography.headlineMedium,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
 
-                            Spacer(modifier = Modifier.height(8.dp))
+                            Spacer(modifier = Modifier.height(4.dp))
+
+                            // Bio
+                            if (uiState.user?.bio?.isNotBlank() == true) {
+                                Text(
+                                    text = uiState.user?.bio ?: "",
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    textAlign = TextAlign.Center
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                            }
 
                             // Role badge
                             Text(
-                                text = if (uiState.isAdmin) "Administrator" else "Player",
+                                text = if (uiState.user?.isAdmin == true) "Administrator" else "Player",
                                 style = MaterialTheme.typography.bodyLarge,
                                 color = MaterialTheme.colorScheme.primary
                             )

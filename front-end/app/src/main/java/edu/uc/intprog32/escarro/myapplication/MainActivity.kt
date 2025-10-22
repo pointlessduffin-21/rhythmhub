@@ -56,6 +56,7 @@ class MainActivity : ComponentActivity() {
                     val startDestination = getStartDestination(applicationContext)
 
                     // Setup navigation graph with all screens
+                    // The ImageLoader is now provided at the Application level via ImageLoaderFactory
                     RhythmNavGraph(
                         navController = navController,
                         context = applicationContext,

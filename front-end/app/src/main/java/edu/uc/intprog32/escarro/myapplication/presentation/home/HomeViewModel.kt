@@ -3,6 +3,7 @@ package edu.uc.intprog32.escarro.myapplication.presentation.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import edu.uc.intprog32.escarro.myapplication.data.model.User
 import edu.uc.intprog32.escarro.myapplication.data.repository.UserRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -13,13 +14,11 @@ import kotlinx.coroutines.launch
 /**
  * UI state for the Home/Dashboard screen.
  *
- * @property username Currently logged in username
- * @property isAdmin Whether the current user is an admin
+ * @property user Current user data (includes username, displayName, avatar)
  * @property isLoading Whether data is being loaded
  */
 data class HomeUiState(
-    val username: String = "",
-    val isAdmin: Boolean = false,
+    val user: User? = null,
     val isLoading: Boolean = true
 )
 
@@ -46,14 +45,18 @@ class HomeViewModel(
     /**
      * Loads current user data from SharedPreferences via Repository.
      */
-    private fun loadUserData() {
+    fun loadUserData() {
         viewModelScope.launch {
-            val currentUser = userRepository.getCurrentUser()
+            val currentUsername = userRepository.getCurrentUser()
+            val user = if (currentUsername != null) {
+                userRepository.getUser(currentUsername)
+            } else {
+                null
+            }
 
             _uiState.update {
                 it.copy(
-                    username = currentUser ?: "Guest",
-                    isAdmin = currentUser == "admin",
+                    user = user,
                     isLoading = false
                 )
             }

@@ -16,6 +16,7 @@ import kotlinx.coroutines.launch
  * @property username Current username input
  * @property password Current password input
  * @property confirmPassword Confirmation password for registration
+ * @property bio The user's bio
  * @property rememberMe Whether "Remember Me" is checked
  * @property isLoading Whether an operation is in progress
  * @property errorMessage Error message to display, null if no error
@@ -25,6 +26,7 @@ data class AuthUiState(
     val username: String = "",
     val password: String = "",
     val confirmPassword: String = "",
+    val bio: String = "",
     val rememberMe: Boolean = false,
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
@@ -35,7 +37,7 @@ data class AuthUiState(
  * ViewModel for authentication operations (Login and Registration).
  * Manages UI state and communicates with UserRepository using SharedPreferences.
  *
- * This ViewModel implements MVVM pattern as required for the assignment.
+ * This ViewModel implements MVVM pattern
  * It uses StateFlow to expose UI state to Compose screens and handles
  * authentication logic by delegating to the Repository layer.
  *
@@ -47,6 +49,7 @@ class AuthViewModel(
 
     private val _uiState = MutableStateFlow(AuthUiState())
     val uiState: StateFlow<AuthUiState> = _uiState.asStateFlow()
+
 
     /**
      * Updates the username field.
@@ -67,6 +70,13 @@ class AuthViewModel(
      */
     fun updateConfirmPassword(confirmPassword: String) {
         _uiState.update { it.copy(confirmPassword = confirmPassword, errorMessage = null) }
+    }
+
+    /**
+     * Updates the bio field.
+     */
+    fun updateBio(bio: String) {
+        _uiState.update { it.copy(bio = bio, errorMessage = null) }
     }
 
     /**
@@ -171,6 +181,7 @@ class AuthViewModel(
             )
 
             if (success) {
+                userRepository.updateBio(currentState.username, currentState.bio)
                 _uiState.update {
                     it.copy(
                         isLoading = false,
