@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(./gradlew:*)",
+      "Bash(dir:*)",
+      "mcp__sequential-thinking__sequentialthinking",
+      "Bash(test:*)",
+      "Bash(.gradlew clean build:*)",
+      "Bash(./gradlew.bat clean build:*)",
+      "mcp__context7__resolve-library-id",
+      "mcp__context7__get-library-docs",
+      "Bash(gradlew.bat clean build:*)",
+      "WebSearch",
+      "Bash(del nul)",
+      "Bash(del UsersManager.kt)",
+      "Bash(del UsersManagerInstrumentedTest.kt)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
