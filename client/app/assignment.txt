@@ -1,0 +1,95 @@
+📱 Project Activity: Application Module Integration (Android – Kotlin)
+Objective: This activity aims to assess your ability to integrate multiple modules or screens into a single functional Android application using Kotlin. You will demonstrate how different parts of your app interact with each other through navigation, UI event handling, and local data storage using SharedPreferences.
+
+🧩 Activity Description
+Each team must perform Application Module Integration on their existing Android project. Your project must now combine all previously created modules or screens into one cohesive and navigable application.
+
+Examples of integration include:
+
+Linking the Login screen to the Home or Dashboard screen.
+Passing data between Activities or Fragments (e.g., username display after login).
+Using SharedPreferences to temporarily store and retrieve user-related data (e.g., login state, username, or theme settings).
+Ensuring smooth navigation using explicit intents or the Navigation Component.
+Displaying consistent UI design and behavior across screens.
+🧠 Expected Output
+By the end of this activity, your app should:
+
+Successfully build and run without crashes.
+Display proper screen navigation and data passing.
+Demonstrate the use of SharedPreferences for saving and retrieving simple data.
+Show an integrated flow between at least two major features or modules (e.g., Login → Dashboard).
+Reflect clean UI design, meaningful variable names, and organized project structure.
+📦 Submission Requirements
+Submit a zipped copy of your Android Studio project folder. Include only the necessary files under your app module (exclude Gradle cache or build folders to minimize size).
+
+Filename format:
+
+LASTNAME_FIRSTNAME-AppIntegration.zip
+Example:
+
+REVILLEZA_ERIC-TaskManagerIntegration.zip
+Before zipping, run Build → Clean Project in Android Studio to remove temporary build files. Ensure the project compiles successfully before submission.
+
+📤 How to Submit
+Upload your .zip file to this Canvas assignment.
+Only one submission per student is allowed.
+Late submissions will not be accepted unless justified and approved in advance.
+⏰ Deadline
+During our next laboratory time only (possibly next week).
+Please use your lab period wisely to finalize, test, and submit your project before the end of the session.
+
+✅ Quick Checklist Before Submission:
+App builds and runs successfully
+Navigation between screens works properly
+SharedPreferences implemented correctly
+UI layout is consistent and user-friendly
+Cleaned project before zipping
+📊 Rubric for Evaluation (Total = 100%)
+Criteria	Description	Weight
+Integration Functionality	Modules/screens are properly connected and functional. Demonstrates smooth navigation between activities or fragments.	40%
+SharedPreferences Implementation	Data (e.g., login info, user settings) is correctly stored and retrieved using SharedPreferences. Shows understanding of lifecycle and persistence.	20%
+User Interface Design	Layout is clean, responsive, and consistent. Proper use of Material Design guidelines and user-friendly navigation.	20%
+Code Quality and Organization	Code is readable, modular, and well-commented. Naming conventions and project structure follow best practices.	10%
+Presentation and Compliance	Project runs without errors, follows submission format, and meets all stated requirements.	10%
+💡 Tip: Instructors can import this rubric directly in Canvas SpeedGrader for structured evaluation.
+
+Rubric
+Application Module Integration
+Application Module Integration
+Criteria	Ratings	Pts
+This criterion is linked to a Learning OutcomeIntegration Functionality
+Modules/screens are properly connected and functional. Demonstrates smooth navigation between activities or fragments.
+40 pts
+Full Marks
+0 pts
+No Marks
+40 pts
+This criterion is linked to a Learning OutcomeSharedPreferences Implementation
+Data (e.g., login info, user settings) is correctly stored and retrieved using SharedPreferences. Shows understanding of lifecycle and persistence.
+20 pts
+Full Marks
+0 pts
+No Marks
+20 pts
+This criterion is linked to a Learning OutcomeUser Interface Design
+Layout is clean, responsive, and consistent. Proper use of Material Design guidelines and user-friendly navigation.
+20 pts
+Full Marks
+0 pts
+No Marks
+20 pts
+This criterion is linked to a Learning OutcomeCode Quality and Organization
+Code is readable, modular, and well-commented. Naming conventions and project structure follow best practices.
+10 pts
+Full Marks
+0 pts
+No Marks
+10 pts
+This criterion is linked to a Learning OutcomePresentation and Compliance
+Project runs without errors, follows submission format, and meets all stated requirements.
+10 pts
+Full Marks
+0 pts
+No Marks
+10 pts
+Total Points: 100

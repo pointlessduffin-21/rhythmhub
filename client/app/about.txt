@@ -1,0 +1,85 @@
+RhythmHub: Product Requirements Document (MVP)
+Authors: Francis Roel Abarca, Jhonn Vincent Arcipe, Sebastian Seth Escarro
+Course: IT-INTPROG32, BSIT - SE 4
+Date: September 28, 2025
+Version: 1.0
+1. Introduction
+RhythmHub is a mobile application designed to solve the common problem of disorganized queues for the arcade rhythm game, Maimai. The game's popularity often leads to confusion and long wait times at arcades. This app provides a streamlined digital queueing system, allowing players to see their place in line in real-time. Additionally, it serves as a community hub where players can share scores, discuss the game, and coordinate play sessions, enhancing the social experience surrounding Maimai.
+This document outlines the requirements for the Minimum Viable Product (MVP), focusing on the core features needed to create a functional and useful application for the Maimai community and to meet the project's academic requirements.
+2. Project Goals & Objectives
+The primary goal of the RhythmHub MVP is to create a functional queue management system that also fosters community interaction.
+Primary Objective: Develop a real-time, location-based queueing system that supports both single and double-player modes.
+Secondary Objective: Implement basic social features, including a community feed and location-specific chat rooms.
+Business Goal: Deliver a working prototype that successfully demonstrates the core functionalities and proves the concept for the academic project.
+3. User Personas
+The Casual Player ("Alex"):
+Bio: A student who plays Maimai once or twice a week with friends.
+Needs: Wants to quickly see how long the wait is at their local arcade before heading over. Wants an easy way to get in line and get a notification when it's almost their turn so they can do other things in the arcade.
+Pain Points: Hates waiting in a physical line without knowing how long it will take; sometimes loses their spot if they walk away.
+The Hardcore Player ("Jamie"):
+Bio: A dedicated player who visits the arcade multiple times a week to practice and achieve high scores.
+Needs: Wants to find other skilled players for 2-player sessions. Needs an efficient way to queue up to maximize their playing time. Enjoys sharing high scores and discussing new game updates with the community.
+Pain Points: Frustrated by disorganized queues and players cutting in line. Wants a dedicated place to connect with the local Maimai community.
+4. MVP Feature Set
+The MVP will focus on the following core features, framed as user stories.
+Feature 1: User Onboarding & Management
+User Story: As a new player, I want to create a simple profile with a username so I can join queues and interact with others.
+Requirements:
+User registration (Username, Password).
+Simple user profile displaying the username.
+Onboarding screen that briefly explains how to use the app.
+Feature 2: Arcade Locator
+User Story: As a player, I want to see a list or map of nearby arcades that have Maimai machines so I can decide where to play.
+Requirements:
+A view that lists registered arcades with Maimai machines.
+Each listing should show the arcade's name and address.
+(Stretch Goal for MVP: A map view showing arcade locations as pins).
+Feature 3: Live Queueing System
+User Story: As a player at an arcade, I want to join a digital queue for a specific Maimai machine, choose between a 1-player or 2-player slot, and see my position in real-time.
+Requirements:
+Players can select an arcade and see the queue(s) for the Maimai machines there.
+A "Join Queue" button that prompts the user to select:
+Play Mode: 1 Player or 2 Players.
+If 2 Players is selected, they can invite another registered user or mark it as "Looking for Partner."
+The queue list must clearly display:
+The order of players.
+The play mode (1P or 2P).
+Usernames of the players.
+A "Next Player" button for the person at the front of the queue to press, which removes them and moves the line up.
+A "Leave Queue" button for users to remove themselves.
+Feature 4: Next Turn Alert
+User Story: As a player in the queue, I want to receive a push notification when I am next in line so I can return to the machine in time for my turn.
+Requirements:
+When a player moves into the #1 position in the queue, the app sends them a notification (e.g., "You're up next at
+!").
+Feature 5: Community Hub
+User Story: As a community member, I want a simple feed where I can post my recent scores or talk about game events, and see posts from other players.
+Requirements:
+A "Community" tab in the app.
+A simple, chronological feed of user-generated posts.
+Functionality to create a new post (text-only for MVP).
+Users can view posts from others.
+Feature 6: Local Chat
+User Story: As a player at a specific mall, I want to join a chat room for that location to talk with other players who are physically there.
+Requirements:
+Each arcade location will have its own dedicated chat room.
+Simple, real-time messaging functionality within that chat room.
+5. Out of Scope for MVP
+To ensure the project is delivered on time, the following features will be considered for future versions but are excluded from the MVP:
+Advance Reservation System: Booking machines for a future date/time is too complex for the initial build.
+Complex User Management: Advanced moderation tools, admin roles, and detailed user profiles.
+Direct Messaging (DM): Private 1-on-1 messaging between users.
+Image/Video Uploads: The community feed will be text-only to simplify development.
+In-depth Game Integration: Linking official game accounts or pulling data directly from the game.
+6. Technical Considerations (High-Level)
+Platform: Kotlin
+Backend: A real-time database is essential for the queueing and chat features. Firebase (Firestore/Realtime Database) is highly recommended for its real-time capabilities and ease of use for a project of this scale.
+Geolocation: A simple location service to list nearby arcades.
+Notifications: Firebase Cloud Messaging (FCM) or a similar service for push notifications.
+7. Success Metrics
+The success of the RhythmHub MVP will be measured by its ability to:
+Allow a user to successfully register and log in.
+Allow a user to view arcades and join a queue.
+Ensure the queue updates in real-time for all users viewing it.
+Successfully send a "next turn" notification.
+Allow users to post and view messages in the community hub and local chat.
