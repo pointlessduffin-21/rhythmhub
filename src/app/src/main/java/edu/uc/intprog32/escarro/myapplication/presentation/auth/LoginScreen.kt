@@ -176,12 +176,12 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             // Helper text
-            Text(
-                text = "Default login: admin / admin",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
-                textAlign = TextAlign.Center
-            )
+//            Text(
+//                text = "Default Credentials: admin / admin",
+//                style = MaterialTheme.typography.bodySmall,
+//                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
+//                textAlign = TextAlign.Center
+//            )
         }
 
         // Snackbar for errors
