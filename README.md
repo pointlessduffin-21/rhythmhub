@@ -1,6 +1,6 @@
 # RhythmHub 🎵
 
-![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)
+![Version](https://img.shields.io/badge/version-1.2.0-blue.svg)
 ![Platform](https://img.shields.io/badge/platform-Android-green.svg)
 ![Language](https://img.shields.io/badge/language-Kotlin-purple.svg)
 ![License](https://img.shields.io/badge/license-MIT-orange.svg)
@@ -13,6 +13,15 @@
 
 This project is developed as part of the IT-INTPROG32 course (BSIT - SE 4) and demonstrates modern Android development practices using the latest technologies and architecture patterns.
 
+## ⚠️ Important: Production Deployment
+
+The application currently defaults to **DEV** mode, which seeds mock data for testing. 
+
+**Before building the APK for production deployment:**
+1. Open `src/app/src/main/java/edu/uc/intprog32/rhythmhub/data/AppConfig.kt`
+2. Change `val ENV = Environment.DEV` to `Environment.PROD`
+3. Build the project: `./gradlew assembleRelease`
+
 ## ✨ Features
 
 ### MVP Feature 1: Enhanced User Onboarding & Management ✅
@@ -23,16 +32,20 @@ This project is developed as part of the IT-INTPROG32 course (BSIT - SE 4) and d
 - **Profile Management**: Edit display name (IGN), regenerate avatar, view user info
 - **Bottom Navigation**: Easy access to Home, Arcades, Community, and Profile
 
+### MVP Feature 2: Digital Queue Management (New!) ✅
+- **Real-Time Queue**: Join and leave queues for specific arcades
+- **Multi-User Support**: Correctly handles multiple users (no longer hardcoded)
+- **AI-Powered Insights**: Estimates wait times and crowd levels
+- **Smart Advice**: Suggests when to play based on queue size
+
 ### UI Features Implemented ✅
 - **Home/Dashboard**: User profile display with avatar and quick actions
 - **Profile/Settings**: Edit display name, regenerate avatar, view role badge
-- **Arcade Locator (Placeholder)**: Coming soon screen with planned features
+- **Arcade Locator**: View nearby arcades and check-in (requires permission)
 - **Community Hub (Placeholder)**: Coming soon screen with planned features
 
 ### Coming Soon 🚀
-- **Live Queueing System**: Real-time digital queue management
 - **Next Turn Alerts**: Push notifications when it's your turn
-- **Arcade Locator**: Interactive map with arcade locations
 - **Community Features**: Forums, local chat, and player connections
 - **Firebase Integration**: Cloud storage and real-time features
 
@@ -48,7 +61,8 @@ app/
 │   ├── util/                      # Utilities
 │   │   
 │   └── repository/                # Repository pattern
-│       └── UserRepository.kt      # SharedPreferences abstraction
+│       ├── UserRepository.kt      # Hybrid Mock/Real Repo
+│       └── QueueRepository.kt     # Queue Logic
 │
 ├── presentation/                  # Presentation Layer
 │   ├── theme/                     # Material 3 theming
@@ -82,8 +96,9 @@ app/
 │   │   ├── ProfileScreen.kt      # Edit profile, regenerate avatar
 │   │   └── ProfileViewModel.kt
 │   │
-│   ├── arcades/                   # Arcade Locator (placeholder)
-│   │   └── ArcadesScreen.kt
+│   ├── arcades/                   # Arcade Locator
+│   │   ├── ArcadesScreen.kt
+│   │   └── ArcadesViewModel.kt
 │   │
 │   └── community/                 # Community Hub (placeholder)
 │       └── CommunityScreen.kt
@@ -100,6 +115,7 @@ app/
 - **Single Activity**: Modern Android navigation with Jetpack Compose
 - **Factory Pattern**: ViewModel creation with dependencies
 - **Observer Pattern**: StateFlow for reactive UI updates
+- **Dependency Injection**: Manual DI via ViewModels
 
 ## 🛠️ Tech Stack
 
@@ -117,9 +133,10 @@ app/
 | Material Design | Material 3 (Material You) |
 | Navigation | Navigation Compose 2.7.7 |
 | State Management | ViewModel + StateFlow |
-| Data Persistence | SharedPreferences |
+| Data Persistence | SharedPreferences & Firestore (Mock/Real Hybrid) |
 | Dependency Injection | Manual (Factory Pattern) |
 | Lifecycle | AndroidX Lifecycle 2.7.0 |
+| Testing | JUnit, MockK, Coroutines Test |
 
 ### Key Dependencies
 ```kotlin
@@ -140,6 +157,11 @@ implementation("androidx.navigation:navigation-compose:2.7.7")
 // Coil for image loading (DiceBear avatars)
 implementation("io.coil-kt:coil-compose:2.5.0")
 implementation("io.coil-kt:coil-svg:2.5.0")
+
+// Testing
+testImplementation(libs.junit)
+testImplementation(libs.mockk)
+testImplementation(libs.kotlinx.coroutines.test)
 ```
 
 ## 🎨 Design System
@@ -190,10 +212,15 @@ Four tabs providing access to all features:
 - Quick action cards for upcoming features
 - Logout functionality
 
-**Arcades Tab (Placeholder):**
-- "Coming Soon" screen with planned features
-- Feature preview cards
-- Map and location icons
+**Arcades Tab:**
+- List of nearby arcades grouped by city
+- Check-in functionality (requires location permission)
+- View queue details for specific arcades
+
+**Queue Screen (New!):**
+- Real-time queue status (Wait time, Crowd level)
+- "Join Queue" / "Leave Queue" actions
+- AI Advisor providing tips based on queue size
 
 **Community Tab (Placeholder):**
 - "Coming Soon" screen with planned features

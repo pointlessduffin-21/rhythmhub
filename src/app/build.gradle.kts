@@ -1,15 +1,16 @@
-plugins {
+﻿plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.google.services)
 }
 
 android {
-    namespace = "edu.uc.intprog32.escarro.myapplication"
+    namespace = "edu.uc.intprog32.rhythmhub"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "edu.uc.intprog32.escarro.myapplication"
+        applicationId = "edu.uc.intprog32.rhythmhub"
         minSdk = 24
         targetSdk = 35
         versionCode = 1
@@ -69,6 +70,20 @@ dependencies {
     implementation("io.coil-kt:coil-compose:2.5.0")
     implementation("io.coil-kt:coil-svg:2.5.0")
 
+    // Firebase
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.analytics)
+    implementation(libs.firebase.auth)
+    implementation(libs.firebase.firestore)
+    implementation(libs.firebase.vertexai)
+
+    // DataStore
+    implementation(libs.androidx.datastore.preferences)
+
+    // Location Services
+    implementation(libs.play.services.location)
+    implementation(libs.play.services.auth)
+
     // Legacy support (can be removed after full migration)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
@@ -77,6 +92,8 @@ dependencies {
 
     // Testing
     testImplementation(libs.junit)
+    testImplementation(libs.mockk)
+    testImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))

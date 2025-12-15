@@ -5,6 +5,24 @@ All notable changes to the RhythmHub project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2025-12-15
+
+### Fixed
+- **Critical Architecture Fixes**:
+  - Removed dangerous `runBlocking` calls from `UserRepository` to prevent UI freezes.
+  - Fixed `QueueViewModel` to use real user IDs instead of hardcoded strings, enabling proper queue functionality.
+  - Fixed dependency injection in `QueueViewModel` to properly accept `UserRepository`.
+  - Resolved `gradle.properties` lint errors by escaping file paths.
+  - Fixed `MainScreen.kt` lint errors regarding unused padding values.
+  - Resolved platform declaration clashes in `Models.kt` by renaming `getAvatarUrl` to `getDisplayAvatarUrl`.
+- **Build System**:
+  - Fixed `gradlew` build issues.
+  - Added `mockk` and `kotlinx-coroutines-test` for unit testing.
+
+### Added
+- **Unit Tests**:
+  - `QueueViewModelTest`: Verifies queue logic, correct user ID matching, and UI state updates.
+
 ## [1.1.0] - 2025-01-22
 
 ### Added
