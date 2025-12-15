@@ -1,4 +1,4 @@
-plugins {
+﻿plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
@@ -6,11 +6,11 @@ plugins {
 }
 
 android {
-    namespace = "edu.uc.intprog32.escarro.myapplication"
+    namespace = "edu.uc.intprog32.rhythmhub"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "edu.uc.intprog32.escarro.myapplication"
+        applicationId = "edu.uc.intprog32.rhythmhub"
         minSdk = 24
         targetSdk = 35
         versionCode = 1
@@ -92,6 +92,8 @@ dependencies {
 
     // Testing
     testImplementation(libs.junit)
+    testImplementation(libs.mockk)
+    testImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
