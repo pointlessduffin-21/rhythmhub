@@ -1,185 +1,182 @@
 package edu.uc.intprog32.escarro.myapplication.data.repository
 
 import android.content.Context
-import android.content.SharedPreferences
+import android.util.Log
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.preferencesDataStore
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import edu.uc.intprog32.escarro.myapplication.data.model.User
-import org.json.JSONObject
-import androidx.core.content.edit
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 
-class UserRepository(context: Context) {
+val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "user_preferences")
 
-    private val sharedPreferences: SharedPreferences =
-        context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+/**
+ * Unified Repository managing User Authentication (Mock/Local via DataStore) and User Profile Data
+ * (Firestore).
+ */
+class UserRepository(private val context: Context) {
+    private val firestore: FirebaseFirestore = Firebase.firestore
+    private val dataStore = context.dataStore
 
+    // Keys
     companion object {
-        private const val PREFS_NAME = "RhythmHubPreferences"
-        private const val KEY_USERS = "users_json"
-        private const val KEY_CURRENT_USER = "current_user"
-        private const val KEY_REMEMBER_ME = "remember_me"
-        private const val KEY_IS_FIRST_LAUNCH = "is_first_launch"
-        private const val KEY_USER_PROFILES = "user_profiles_json"
+        val CURRENT_USER_KEY = stringPreferencesKey("current_user")
+        val REMEMBER_ME_KEY = booleanPreferencesKey("remember_me")
+        val IS_FIRST_LAUNCH_KEY = booleanPreferencesKey("is_first_launch")
+        // Dynamic keys for user storage: "user_$username" -> password, "bio_$username" -> bio
     }
+
+    // Live User Data from Firestore
+    private val _currentUser = MutableStateFlow<User?>(null)
+    val currentUser: StateFlow<User?> = _currentUser.asStateFlow()
 
     init {
-        ensureAdminExists()
-    }
-
-    private fun ensureAdminExists() {
-        val users = getAllUsers()
-        if (!users.containsKey("admin")) {
-            val updatedUsers = users.toMutableMap()
-            updatedUsers["admin"] = "admin"
-            saveAllUsers(updatedUsers)
+        // Initialize current user from DataStore (blocking for init consistency or launch in scope)
+        // Ideally should be properly scoped, but for this hybrid repo we check on init.
+        runBlocking {
+            val username = getCurrentUser()
+            if (username != null) {
+                listenToFirestoreUser(username)
+            }
         }
     }
 
-    private fun getAllUsers(): Map<String, String> {
-        val jsonString = sharedPreferences.getString(KEY_USERS, "{}") ?: "{}"
-        val jsonObject = JSONObject(jsonString)
-        val usersMap = mutableMapOf<String, String>()
+    // --- Firestore / Gamification Logic ---
 
-        jsonObject.keys().forEach { key ->
-            usersMap[key] = jsonObject.getString(key)
+    private fun listenToFirestoreUser(username: String) {
+        firestore.collection("users").document(username).addSnapshotListener { snapshot, e ->
+            if (e != null) {
+                Log.e("UserRepo", "Listen failed", e)
+                return@addSnapshotListener
+            }
+
+            if (snapshot != null && snapshot.exists()) {
+                try {
+                    val localBio = runBlocking { getBio(username) } // Fallback to local
+                    val user =
+                            User(
+                                    id = snapshot.id,
+                                    username = snapshot.getString("username") ?: username,
+                                    email = snapshot.getString("email") ?: "",
+                                    xp = snapshot.getLong("xp")?.toInt() ?: 0,
+                                    level = snapshot.getLong("level")?.toInt() ?: 1,
+                                    trustScore = snapshot.getDouble("trustScore")?.toFloat()
+                                                    ?: 1.0f,
+                                    bio = snapshot.getString("bio") ?: localBio,
+                                    isAdmin = snapshot.getBoolean("isAdmin") ?: false,
+                                    avatarUrl = snapshot.getString("avatarUrl") ?: ""
+                            )
+                    _currentUser.value = user
+                } catch (ex: Exception) {
+                    Log.e("UserRepo", "Error parsing user", ex)
+                }
+            } else {
+                val defaultUser = User(id = username, username = username, xp = 0, level = 1)
+                firestore.collection("users").document(username).set(defaultUser)
+                _currentUser.value = defaultUser
+            }
         }
-
-        return usersMap
     }
 
-    private fun saveAllUsers(users: Map<String, String>) {
-        val jsonObject = JSONObject()
-        users.forEach { (username, password) ->
-            jsonObject.put(username, password)
-        }
+    // --- Mock Authentication Logic (DataStore) ---
 
-        sharedPreferences.edit {
-            putString(KEY_USERS, jsonObject.toString())
+    suspend fun getCurrentUser(): String? {
+        val prefs = dataStore.data.first()
+        return prefs[CURRENT_USER_KEY]
+    }
+
+    suspend fun setCurrentUser(username: String) {
+        dataStore.edit { prefs -> prefs[CURRENT_USER_KEY] = username }
+        listenToFirestoreUser(username)
+    }
+
+    suspend fun getUser(username: String): User? {
+        val passwordKey = stringPreferencesKey("user_$username")
+        val prefs = dataStore.data.first()
+        val storedPassword = prefs[passwordKey]
+
+        return if (storedPassword != null) {
+            if (_currentUser.value?.username == username) {
+                _currentUser.value
+            } else {
+                User(id = username, username = username)
+            }
+        } else {
+            null
         }
     }
 
-    fun registerUser(username: String, password: String): Boolean {
-        val users = getAllUsers().toMutableMap()
+    suspend fun validateUser(username: String, password: String): Boolean {
+        val passwordKey = stringPreferencesKey("user_$username")
+        val prefs = dataStore.data.first()
+        val storedPassword = prefs[passwordKey]
+        return storedPassword == password
+    }
 
-        if (users.containsKey(username)) {
+    suspend fun registerUser(username: String, password: String): Boolean {
+        val passwordKey = stringPreferencesKey("user_$username")
+        val prefs = dataStore.data.first()
+
+        if (prefs.contains(passwordKey)) {
             return false
         }
 
-        users[username] = password
-        saveAllUsers(users)
+        dataStore.edit { it[passwordKey] = password }
+
+        val newUser = User(id = username, username = username, xp = 0, level = 1)
+        firestore.collection("users").document(username).set(newUser)
+
         return true
     }
 
-    fun validateUser(username: String, password: String): Boolean {
-        val users = getAllUsers()
-        return users[username] == password
+    private suspend fun getBio(username: String): String {
+        val bioKey = stringPreferencesKey("bio_$username")
+        return dataStore.data.first()[bioKey] ?: ""
     }
 
-    fun userExists(username: String): Boolean {
-        return getAllUsers().containsKey(username)
+    suspend fun updateBio(username: String, bio: String) {
+        val bioKey = stringPreferencesKey("bio_$username")
+        dataStore.edit { it[bioKey] = bio }
+        firestore.collection("users").document(username).update("bio", bio)
     }
 
-    fun setCurrentUser(username: String) {
-        sharedPreferences.edit {
-            putString(KEY_CURRENT_USER, username)
+    suspend fun setRememberMe(enabled: Boolean) {
+        dataStore.edit { it[REMEMBER_ME_KEY] = enabled }
+    }
+
+    suspend fun logout() {
+        dataStore.edit { it.remove(CURRENT_USER_KEY) }
+        _currentUser.value = null
+    }
+
+    fun isFirstLaunch(): Boolean = runBlocking {
+        val prefs = dataStore.data.first()
+        val isFirst = prefs[IS_FIRST_LAUNCH_KEY] ?: true
+        if (isFirst) {
+            dataStore.edit { it[IS_FIRST_LAUNCH_KEY] = false }
         }
+        isFirst
     }
 
-    fun getCurrentUser(): String? {
-        return sharedPreferences.getString(KEY_CURRENT_USER, null)
+    fun shouldAutoLogin(): Boolean = runBlocking {
+        val prefs = dataStore.data.first()
+        val remember = prefs[REMEMBER_ME_KEY] ?: false
+        val user = prefs[CURRENT_USER_KEY]
+        remember && user != null
     }
 
-    fun clearCurrentUser() {
-        sharedPreferences.edit {
-            remove(KEY_CURRENT_USER)
-        }
-    }
-
-    fun setRememberMe(remember: Boolean) {
-        sharedPreferences.edit {
-            putBoolean(KEY_REMEMBER_ME, remember)
-        }
-    }
-
-    fun getRememberMe(): Boolean {
-        return sharedPreferences.getBoolean(KEY_REMEMBER_ME, false)
-    }
-
-    fun isFirstLaunch(): Boolean {
-        return sharedPreferences.getBoolean(KEY_IS_FIRST_LAUNCH, true)
-    }
-
-    fun setOnboardingCompleted() {
-        sharedPreferences.edit {
-            putBoolean(KEY_IS_FIRST_LAUNCH, false)
-        }
-    }
-
-    fun shouldAutoLogin(): Boolean {
-        return getRememberMe() && getCurrentUser() != null
-    }
-
-    fun logout() {
-        clearCurrentUser()
-        setRememberMe(false)
-    }
-
-    fun getUser(username: String): User? {
-        val users = getAllUsers()
-        val password = users[username] ?: return null
-        val profiles = getUserProfiles()
-        val profile = profiles[username] as? Map<String, String>
-
-        return User(
-            username = username,
-            password = password,
-            bio = profile?.get("bio") ?: "",
-            avatarSeed = profile?.get("avatarSeed") ?: username,
-            isAdmin = username == "admin"
-        )
-    }
-
-    fun updateAvatarSeed(username: String, avatarSeed: String) {
-        val profiles = getUserProfiles().toMutableMap()
-        val userProfile = (profiles[username] as? Map<String, String>)?.toMutableMap() ?: mutableMapOf()
-        userProfile["avatarSeed"] = avatarSeed
-        profiles[username] = userProfile
-        saveUserProfiles(profiles)
-    }
-    
-    fun updateBio(username: String, bio: String) {
-        val profiles = getUserProfiles().toMutableMap()
-        val userProfile = (profiles[username] as? Map<String, String>)?.toMutableMap() ?: mutableMapOf()
-        userProfile["bio"] = bio
-        profiles[username] = userProfile
-        saveUserProfiles(profiles)
-    }
-
-    private fun getUserProfiles(): Map<String, Any> {
-        val jsonString = sharedPreferences.getString(KEY_USER_PROFILES, "{}") ?: "{}"
-        val jsonObject = JSONObject(jsonString)
-        val profilesMap = mutableMapOf<String, Any>()
-
-        jsonObject.keys().forEach { key ->
-            val profileJson = jsonObject.getJSONObject(key)
-            val profileData = mutableMapOf<String, String>()
-            profileJson.keys().forEach { profileKey ->
-                profileData[profileKey] = profileJson.optString(profileKey, "")
-            }
-            profilesMap[key] = profileData
-        }
-        return profilesMap
-    }
-
-    private fun saveUserProfiles(profiles: Map<String, Any>) {
-        val jsonObject = JSONObject()
-        profiles.forEach { (username, profileData) ->
-            if (profileData is Map<*, *>) {
-                val profileJson = JSONObject(profileData)
-                jsonObject.put(username, profileJson)
-            }
-        }
-
-        sharedPreferences.edit {
-            putString(KEY_USER_PROFILES, jsonObject.toString())
-        }
+    /** Marks onboarding as completed so it won't show again. */
+    fun setOnboardingCompleted() = runBlocking {
+        dataStore.edit { it[IS_FIRST_LAUNCH_KEY] = false }
     }
 }

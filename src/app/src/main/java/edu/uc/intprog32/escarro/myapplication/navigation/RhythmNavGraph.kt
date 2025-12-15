@@ -7,123 +7,141 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import edu.uc.intprog32.escarro.myapplication.data.repository.UserRepository
+import edu.uc.intprog32.escarro.myapplication.presentation.admin.AdminScreen
 import edu.uc.intprog32.escarro.myapplication.presentation.auth.AuthViewModel
 import edu.uc.intprog32.escarro.myapplication.presentation.auth.LoginScreen
 import edu.uc.intprog32.escarro.myapplication.presentation.auth.RegisterScreen
 import edu.uc.intprog32.escarro.myapplication.presentation.main.MainScreen
 import edu.uc.intprog32.escarro.myapplication.presentation.onboarding.OnboardingScreen
 import edu.uc.intprog32.escarro.myapplication.presentation.onboarding.OnboardingViewModel
+import edu.uc.intprog32.escarro.myapplication.presentation.queue.QueueScreen
 
-/**
- * Navigation routes for the RhythmHub app.
- */
+/** Navigation routes for the RhythmHub app. */
 object RhythmRoutes {
     const val ONBOARDING = "onboarding"
     const val LOGIN = "login"
     const val REGISTER = "register"
     const val HOME = "home"
+    const val QUEUE_BASE = "queue"
+    const val QUEUE = "$QUEUE_BASE/{arcadeId}"
+    const val ADMIN = "admin"
 }
 
 /**
- * Main navigation graph for RhythmHub application.
- * Implements proper screen navigation
+ * Main navigation graph for RhythmHub application. Implements proper screen navigation
  *
  * Uses Navigation Compose to handle transitions between:
  * - Onboarding (first launch only)
  * - Login
  * - Registration
  * - Main Screen with Bottom Navigation:
- *   - Home/Dashboard
- *   - Arcade Locator (placeholder)
- *   - Community Hub (placeholder)
- *   - Profile/Settings
+ * - Home/Dashboard
+ * - Arcade Locator (placeholder)
+ * - Community Hub (placeholder)
+ * - Profile/Settings
  *
  * @param navController Navigation controller
  * @param context Application context for Repository initialization
  * @param startDestination Initial destination based on app state
  */
 @Composable
-fun RhythmNavGraph(
-    navController: NavHostController,
-    context: Context,
-    startDestination: String
-) {
+fun RhythmNavGraph(navController: NavHostController, context: Context, startDestination: String) {
     // Initialize repository (uses SharedPreferences as required)
     val userRepository = UserRepository(context)
 
-    NavHost(
-        navController = navController,
-        startDestination = startDestination
-    ) {
+    NavHost(navController = navController, startDestination = startDestination) {
         // Onboarding Screen
         composable(RhythmRoutes.ONBOARDING) {
-            val viewModel: OnboardingViewModel = viewModel(
-                factory = OnboardingViewModel.Factory(userRepository)
-            )
+            val viewModel: OnboardingViewModel =
+                    viewModel(factory = OnboardingViewModel.Factory(userRepository))
 
             OnboardingScreen(
-                onContinue = {
-                    navController.navigate(RhythmRoutes.LOGIN) {
-                        popUpTo(RhythmRoutes.ONBOARDING) { inclusive = true }
-                    }
-                },
-                viewModel = viewModel
+                    onContinue = {
+                        navController.navigate(RhythmRoutes.LOGIN) {
+                            popUpTo(RhythmRoutes.ONBOARDING) { inclusive = true }
+                        }
+                    },
+                    viewModel = viewModel
             )
         }
 
         // Login Screen
         composable(RhythmRoutes.LOGIN) {
-            val viewModel: AuthViewModel = viewModel(
-                factory = AuthViewModel.Factory(userRepository)
-            )
+            val viewModel: AuthViewModel =
+                    viewModel(factory = AuthViewModel.Factory(userRepository))
 
             LoginScreen(
-                onLoginSuccess = {
-                    navController.navigate(RhythmRoutes.HOME) {
-                        popUpTo(RhythmRoutes.LOGIN) { inclusive = true }
-                    }
-                },
-                onNavigateToRegister = {
-                    navController.navigate(RhythmRoutes.REGISTER)
-                },
-                viewModel = viewModel
+                    onLoginSuccess = {
+                        navController.navigate(RhythmRoutes.HOME) {
+                            popUpTo(RhythmRoutes.LOGIN) { inclusive = true }
+                        }
+                    },
+                    onNavigateToRegister = { navController.navigate(RhythmRoutes.REGISTER) },
+                    viewModel = viewModel
             )
         }
 
         // Registration Screen
         composable(RhythmRoutes.REGISTER) {
-            val viewModel: AuthViewModel = viewModel(
-                factory = AuthViewModel.Factory(userRepository)
-            )
+            val viewModel: AuthViewModel =
+                    viewModel(factory = AuthViewModel.Factory(userRepository))
 
             RegisterScreen(
-                onRegistrationSuccess = {
-                    navController.popBackStack()
-                },
-                onNavigateBack = {
-                    navController.popBackStack()
-                },
-                viewModel = viewModel
+                    onRegistrationSuccess = { navController.popBackStack() },
+                    onNavigateBack = { navController.popBackStack() },
+                    viewModel = viewModel
             )
         }
 
         // Main Screen with Bottom Navigation (Home, Arcades, Community, Profile)
         composable(RhythmRoutes.HOME) {
             MainScreen(
-                onLogout = {
-                    navController.navigate(RhythmRoutes.LOGIN) {
-                        popUpTo(0) { inclusive = true }
-                    }
-                },
-                userRepository = userRepository
+                    onLogout = {
+                        navController.navigate(RhythmRoutes.LOGIN) {
+                            popUpTo(0) { inclusive = true }
+                        }
+                    },
+                    onNavigateToQueue = { arcadeId ->
+                        navController.navigate("${RhythmRoutes.QUEUE_BASE}/$arcadeId")
+                    },
+                    onNavigateToAdmin = { navController.navigate(RhythmRoutes.ADMIN) },
+                    userRepository = userRepository
             )
+        }
+
+        // Admin Dashboard Screen
+        composable(RhythmRoutes.ADMIN) {
+            AdminScreen(
+                    userRepository = userRepository,
+                    onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        // Queue Detail Screen
+        composable(
+                route = RhythmRoutes.QUEUE,
+                arguments =
+                        listOf(
+                                androidx.navigation.navArgument("arcadeId") {
+                                    type = androidx.navigation.NavType.StringType
+                                }
+                        )
+        ) {
+            val viewModel:
+                    edu.uc.intprog32.escarro.myapplication.presentation.queue.QueueViewModel =
+                    viewModel(
+                            factory =
+                                    edu.uc.intprog32.escarro.myapplication.presentation.queue
+                                            .QueueViewModel.Factory
+                    )
+            QueueScreen(viewModel = viewModel)
         }
     }
 }
 
 /**
- * Determines the start destination based on app state.
- * Checks SharedPreferences for first launch and auto-login state.
+ * Determines the start destination based on app state. Checks SharedPreferences for first launch
+ * and auto-login state.
  *
  * @param context Application context
  * @return The appropriate start destination route

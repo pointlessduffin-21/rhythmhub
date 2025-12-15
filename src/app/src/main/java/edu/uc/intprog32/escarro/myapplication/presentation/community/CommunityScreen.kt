@@ -1,35 +1,35 @@
 package edu.uc.intprog32.escarro.myapplication.presentation.community
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Chat
-import androidx.compose.material.icons.filled.Forum
-import androidx.compose.material.icons.filled.People
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ChatBubbleOutline
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import edu.uc.intprog32.escarro.myapplication.data.model.Post
 import edu.uc.intprog32.escarro.myapplication.presentation.components.GradientBackground
 
-/**
- * Placeholder screen for Community Hub feature.
- * MVP Feature 4: Connect with other Maimai players.
- *
- * This screen will eventually include:
- * - Local chat for arcade coordination
- * - Community forums and discussions
- * - Player profiles and friend system
- * - Event notifications
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CommunityScreen() {
+fun CommunityScreen(
+    viewModel: CommunityViewModel = viewModel<CommunityViewModel>(factory = CommunityViewModel.Factory)
+) {
+    val posts by viewModel.posts.collectAsState()
+    var showDialog by remember { mutableStateOf(false) }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -39,154 +39,162 @@ fun CommunityScreen() {
                     titleContentColor = MaterialTheme.colorScheme.onPrimary
                 )
             )
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = { showDialog = true },
+                containerColor = MaterialTheme.colorScheme.primary
+            ) {
+                Icon(Icons.Default.Add, contentDescription = "Add Post")
+            }
         }
     ) { paddingValues ->
         GradientBackground {
-            Column(
+            LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
                     .padding(paddingValues)
-                    .padding(24.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
+                    .padding(horizontal = 16.dp),
+                contentPadding = PaddingValues(vertical = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // Main Icon
-                Icon(
-                    imageVector = Icons.Default.People,
-                    contentDescription = "Community",
-                    modifier = Modifier.size(120.dp),
-                    tint = MaterialTheme.colorScheme.primary
-                )
-
-                Spacer(modifier = Modifier.height(32.dp))
-
-                // Title
-                Text(
-                    text = "Community Hub",
-                    style = MaterialTheme.typography.headlineLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onBackground
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Status Badge
-                Card(
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.secondaryContainer
-                    ),
-                    shape = RoundedCornerShape(16.dp)
-                ) {
-                    Text(
-                        text = "Coming Soon",
-                        modifier = Modifier.padding(horizontal = 24.dp, vertical = 12.dp),
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.onSecondaryContainer,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(32.dp))
-
-                // Feature Preview Card
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(20.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surface
-                    ),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(24.dp)
-                    ) {
-                        Text(
-                            text = "Planned Features",
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        // Feature 1
-                        FeatureItem(
-                            icon = Icons.Default.Chat,
-                            title = "Local Chat",
-                            description = "Chat with players at the same arcade in real-time"
-                        )
-
-                        Spacer(modifier = Modifier.height(12.dp))
-
-                        // Feature 2
-                        FeatureItem(
-                            icon = Icons.Default.Forum,
-                            title = "Community Forums",
-                            description = "Discuss strategies, share scores, and connect with players"
-                        )
-
-                        Spacer(modifier = Modifier.height(12.dp))
-
-                        // Feature 3
-                        FeatureItem(
-                            icon = Icons.Default.People,
-                            title = "Find Players",
-                            description = "Connect with other Maimai enthusiasts and make friends"
-                        )
+                if (posts.size == 0) {
+                    item {
+                        Box(
+                            modifier = Modifier.fillParentMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text("No posts yet. Be the first!")
+                        }
+                    }
+                } else {
+                    items(items = posts) { post ->
+                        PostItem(post = post)
                     }
                 }
+            }
+        }
 
-                Spacer(modifier = Modifier.height(24.dp))
+        if (showDialog) {
+            AddPostDialog(
+                onDismiss = { showDialog = false },
+                onPost = { content ->
+                    viewModel.addPost(content)
+                    showDialog = false
+                }
+            )
+        }
+    }
+}
 
-                // Info Text
-                Text(
-                    text = "This feature will be available in a future update. Stay tuned!",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
-                    textAlign = TextAlign.Center
-                )
+@Composable
+fun PostItem(post: Post) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            // Header
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primaryContainer),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = post.authorName.first().uppercase(),
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
+                Spacer(modifier = Modifier.width(12.dp))
+                Column {
+                    Text(
+                        text = post.authorName,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = "${(System.currentTimeMillis() - post.timestamp) / 60000} mins ago",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Content
+            Text(
+                text = post.content,
+                style = MaterialTheme.typography.bodyLarge
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Actions
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End
+            ) {
+                IconButton(onClick = { /* TODO */ }) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Default.FavoriteBorder, contentDescription = "Like", modifier = Modifier.size(20.dp))
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(text = "${post.likes}", style = MaterialTheme.typography.labelLarge)
+                    }
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+                IconButton(onClick = { /* TODO */ }) {
+                    Icon(Icons.Default.ChatBubbleOutline, contentDescription = "Comment", modifier = Modifier.size(20.dp))
+                }
             }
         }
     }
 }
 
 @Composable
-private fun FeatureItem(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
-    title: String,
-    description: String
+fun AddPostDialog(
+    onDismiss: () -> Unit,
+    onPost: (String) -> Unit
 ) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.Top
-    ) {
-        Icon(
-            imageVector = icon,
-            modifier = Modifier.size(32.dp),
-            contentDescription = title,
-            tint = MaterialTheme.colorScheme.primary
-        )
+    var text by remember { mutableStateOf(TextFieldValue("")) }
 
-        Spacer(modifier = Modifier.width(16.dp))
-
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onSurface
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("New Post") },
+        text = {
+            OutlinedTextField(
+                value = text,
+                onValueChange = { text = it },
+                label = { Text("What's on your mind?") },
+                modifier = Modifier.fillMaxWidth(),
+                minLines = 3
             )
-
-            Spacer(modifier = Modifier.height(4.dp))
-
-            Text(
-                text = description,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    if (text.text.isNotBlank()) {
+                        onPost(text.text)
+                    }
+                }
+            ) {
+                Text("Post")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
         }
-    }
+    )
 }

@@ -1,0 +1,28 @@
+
+> Task :app:signingReport
+Variant: debug
+Config: debug
+Store: C:\Users\elliot\.android\debug.keystore
+Alias: AndroidDebugKey
+MD5: B8:34:DA:71:F3:31:39:2D:76:CC:E7:7A:AD:C2:D5:23
+SHA1: 9A:EF:68:CC:7F:8A:E8:AB:CE:C5:EA:00:6C:5C:D3:9B:DF:76:71:23
+SHA-256: E5:54:C5:79:CA:AB:C7:C1:B0:9C:58:9B:AA:C0:A1:05:DB:6D:09:11:FD:13:13:8C:01:31:2D:8C:CF:58:A5:6D
+Valid until: Sunday, September 5, 2055
+----------
+Variant: release
+Config: null
+Store: null
+Alias: null
+----------
+Variant: debugAndroidTest
+Config: debug
+Store: C:\Users\elliot\.android\debug.keystore
+Alias: AndroidDebugKey
+MD5: B8:34:DA:71:F3:31:39:2D:76:CC:E7:7A:AD:C2:D5:23
+SHA1: 9A:EF:68:CC:7F:8A:E8:AB:CE:C5:EA:00:6C:5C:D3:9B:DF:76:71:23
+SHA-256: E5:54:C5:79:CA:AB:C7:C1:B0:9C:58:9B:AA:C0:A1:05:DB:6D:09:11:FD:13:13:8C:01:31:2D:8C:CF:58:A5:6D
+Valid until: Sunday, September 5, 2055
+----------
+
+BUILD SUCCESSFUL in 4s
+1 actionable task: 1 executed
