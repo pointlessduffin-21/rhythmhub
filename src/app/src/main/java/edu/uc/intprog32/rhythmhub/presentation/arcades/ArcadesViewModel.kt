@@ -8,6 +8,8 @@ import edu.uc.intprog32.rhythmhub.data.AppConfig
 import edu.uc.intprog32.rhythmhub.data.model.Arcade
 import edu.uc.intprog32.rhythmhub.data.repository.ArcadeRepository
 import edu.uc.intprog32.rhythmhub.data.repository.CheckInRepository
+import edu.uc.intprog32.rhythmhub.data.repository.MockArcadeRepository
+import edu.uc.intprog32.rhythmhub.data.repository.MockCheckInRepository
 import edu.uc.intprog32.rhythmhub.data.repository.RealArcadeRepository
 import edu.uc.intprog32.rhythmhub.data.repository.RealCheckInRepository
 import edu.uc.intprog32.rhythmhub.data.repository.UserRepository
@@ -59,13 +61,23 @@ class ArcadesViewModel(
             val application =
                     (extras[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as
                             android.app.Application)
-            return ArcadesViewModel(
-                    RealArcadeRepository(application.applicationContext),
-                    RealCheckInRepository(),
-                    userRepository
-            ) as
-                    T
+
+            // Use Mock repositories in Dev Mode for easier testing
+            val arcadeRepo: ArcadeRepository =
+                    if (AppConfig.isDev) {
+                        MockArcadeRepository
+                    } else {
+                        RealArcadeRepository(application.applicationContext)
+                    }
+
+            val checkInRepo: CheckInRepository =
+                    if (AppConfig.isDev) {
+                        MockCheckInRepository
+                    } else {
+                        RealCheckInRepository()
+                    }
+
+            return ArcadesViewModel(arcadeRepo, checkInRepo, userRepository) as T
         }
     }
 }
-

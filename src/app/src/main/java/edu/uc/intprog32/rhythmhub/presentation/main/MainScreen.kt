@@ -1,5 +1,7 @@
 ﻿package edu.uc.intprog32.rhythmhub.presentation.main
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LocationOn
@@ -10,10 +12,8 @@ import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.People
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.*
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.padding
-import androidx.compose.ui.Modifier
 import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -138,37 +138,49 @@ fun MainScreen(
                 Box(modifier = Modifier.padding(paddingValues)) {
                         // Content based on selected tab
                         when (selectedTab) {
-                        0 -> {
-                                // Home Screen
-                                val homeViewModel: HomeViewModel =
-                                        viewModel(factory = HomeViewModel.Factory(userRepository))
-                                HomeScreen(onLogout = onLogout, viewModel = homeViewModel)
-                        }
-                        1 -> {
-                                // Arcades Screen
-                                ArcadesScreen(
-                                        userRepository = userRepository,
-                                        onViewQueue = onNavigateToQueue
-                                )
-                        }
-                        2 -> {
-                                // Community Screen
-                                CommunityScreen()
-                        }
-                        3 -> {
-                                // Profile Screen
-                                val profileViewModel: ProfileViewModel =
-                                        viewModel<ProfileViewModel>(
-                                                factory = ProfileViewModel.Factory(userRepository)
+                                0 -> {
+                                        // Home Screen
+                                        val homeViewModel: HomeViewModel =
+                                                viewModel(
+                                                        factory =
+                                                                HomeViewModel.Factory(
+                                                                        userRepository
+                                                                )
+                                                )
+                                        HomeScreen(
+                                                onLogout = onLogout,
+                                                onNavigateToArcades = { selectedTab = 1 },
+                                                onNavigateToCommunity = { selectedTab = 2 },
+                                                viewModel = homeViewModel
                                         )
-                                ProfileScreen(
-                                        onLogout = onLogout,
-                                        onNavigateToAdmin = onNavigateToAdmin,
-                                        viewModel = profileViewModel
-                                )
+                                }
+                                1 -> {
+                                        // Arcades Screen
+                                        ArcadesScreen(
+                                                userRepository = userRepository,
+                                                onViewQueue = onNavigateToQueue
+                                        )
+                                }
+                                2 -> {
+                                        // Community Screen
+                                        CommunityScreen(userRepository = userRepository)
+                                }
+                                3 -> {
+                                        // Profile Screen
+                                        val profileViewModel: ProfileViewModel =
+                                                viewModel<ProfileViewModel>(
+                                                        factory =
+                                                                ProfileViewModel.Factory(
+                                                                        userRepository
+                                                                )
+                                                )
+                                        ProfileScreen(
+                                                onLogout = onLogout,
+                                                onNavigateToAdmin = onNavigateToAdmin,
+                                                viewModel = profileViewModel
+                                        )
+                                }
                         }
-                }
                 }
         }
 }
-

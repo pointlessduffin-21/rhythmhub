@@ -124,3 +124,6 @@ pubsub-debug.log
 *.tmp
 *.bak
 *.orig
+
+# ===== AI Tooling =====
+.claude/

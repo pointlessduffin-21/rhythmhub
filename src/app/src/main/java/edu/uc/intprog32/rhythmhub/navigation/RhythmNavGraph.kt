@@ -128,14 +128,13 @@ fun RhythmNavGraph(navController: NavHostController, context: Context, startDest
                                 }
                         )
         ) {
-            val viewModel:
-                    edu.uc.intprog32.rhythmhub.presentation.queue.QueueViewModel =
+            val viewModel: edu.uc.intprog32.rhythmhub.presentation.queue.QueueViewModel =
                     viewModel(
                             factory =
-                                    edu.uc.intprog32.rhythmhub.presentation.queue
-                                            .QueueViewModel.Factory(userRepository)
+                                    edu.uc.intprog32.rhythmhub.presentation.queue.QueueViewModel
+                                            .Factory(userRepository)
                     )
-            QueueScreen(viewModel = viewModel)
+            QueueScreen(viewModel = viewModel, onNavigateBack = { navController.popBackStack() })
         }
     }
 }
@@ -161,4 +160,3 @@ fun getStartDestination(context: Context): String = runBlocking {
         else -> RhythmRoutes.LOGIN
     }
 }
-

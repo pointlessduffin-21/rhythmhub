@@ -20,6 +20,7 @@ val RhythmPurpleDark = Color(0xFF6A1B9A)
 // Accent Colors
 val RhythmYellow = Color(0xFFFFD600)
 val RhythmOrange = Color(0xFFFF6D00)
+val RhythmGreen = Color(0xFF00E676)
 
 // Background Colors - Dark theme for arcade aesthetic
 val BackgroundDark = Color(0xFF121212)
@@ -41,4 +42,3 @@ val ErrorColor = Color(0xFFFF5252)
 
 // Success/Info
 val SuccessColor = Color(0xFF4CAF50)
-
