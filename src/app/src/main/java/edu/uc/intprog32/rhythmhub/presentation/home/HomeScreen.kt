@@ -7,280 +7,268 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Queue
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
-import edu.uc.intprog32.rhythmhub.presentation.components.GradientBackground
-import edu.uc.intprog32.rhythmhub.presentation.components.RhythmOutlinedButton
+import edu.uc.intprog32.rhythmhub.presentation.components.*
+import edu.uc.intprog32.rhythmhub.presentation.theme.*
 
-/**
- * Home/Dashboard screen displaying user profile and app features.
- * Implements MVP Feature 1: Simple user profile displaying the username.
- *
- * Uses MVVM pattern with HomeViewModel and SharedPreferences through Repository.
- *
- * @param onLogout Callback when user logs out
- * @param viewModel ViewModel for home screen logic
- */
+/** Redesigned Home/Dashboard screen with premium Maimai aesthetic. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    onLogout: () -> Unit,
-    viewModel: HomeViewModel = viewModel()
+        onLogout: () -> Unit,
+        onNavigateToArcades: () -> Unit = {},
+        onNavigateToCommunity: () -> Unit = {},
+        viewModel: HomeViewModel = viewModel()
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+        val uiState by viewModel.uiState.collectAsState()
 
-    // Automatically refresh data when the screen is shown
-    LaunchedEffect(Unit) {
-        viewModel.loadUserData()
-    }
+        LaunchedEffect(Unit) { viewModel.loadUserData() }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("RhythmHub") },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimary
-                )
-            )
-        }
-    ) { paddingValues ->
         GradientBackground {
-            if (uiState.isLoading) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator()
-                }
-            } else {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .verticalScroll(rememberScrollState())
-                        .padding(paddingValues)
-                        .padding(24.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    // Profile Card
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(20.dp),
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surface
-                        ),
-                        elevation = CardDefaults.cardElevation(
-                            defaultElevation = 6.dp
-                        )
-                    ) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(24.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            // Avatar - DiceBear
-                            Box(
-                                modifier = Modifier
-                                    .size(100.dp)
-                                    .clip(CircleShape)
-                                    .background(MaterialTheme.colorScheme.primaryContainer),
+                if (uiState.isLoading) {
+                        Box(
+                                modifier = Modifier.fillMaxSize(),
                                 contentAlignment = Alignment.Center
-                            ) {
-                                uiState.user?.let { user ->
-                                    AsyncImage(
-                                        model = user.getDisplayAvatarUrl(),
-                                        contentDescription = "Profile Avatar",
-                                        modifier = Modifier
-                                            .size(100.dp)
-                                            .clip(CircleShape),
-                                        contentScale = ContentScale.Crop
-                                    )
-                                }
-                            }
-
-                            Spacer(modifier = Modifier.height(16.dp))
-
-                            // Username
-                            Text(
-                                text = uiState.user?.username ?: "Guest",
-                                style = MaterialTheme.typography.headlineMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-
-                            Spacer(modifier = Modifier.height(4.dp))
-
-                            // Bio
-                            if (uiState.user?.bio?.isNotBlank() == true) {
-                                Text(
-                                    text = uiState.user?.bio ?: "",
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    textAlign = TextAlign.Center
-                                )
-                                Spacer(modifier = Modifier.height(8.dp))
-                            }
-
-                            // Role badge
-                            Text(
-                                text = if (uiState.user?.isAdmin == true) "Administrator" else "Player",
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(32.dp))
-
-                    // Quick Actions Title
-                    Text(
-                        text = "Quick Actions",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.onBackground,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    // Feature Cards (Placeholders for future features)
-                    FeatureCard(
-                        title = "Join Queue",
-                        description = "Find arcades and join the Maimai queue",
-                        icon = Icons.Default.Queue,
-                        enabled = false
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    // Welcome message
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(16.dp),
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f)
-                        )
-                    ) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(20.dp)
-                        ) {
-                            Text(
-                                text = "Welcome to RhythmHub!",
-                                style = MaterialTheme.typography.titleMedium,
-                                color = MaterialTheme.colorScheme.onSecondaryContainer,
-                                fontWeight = FontWeight.Bold
-                            )
-
-                            Spacer(modifier = Modifier.height(8.dp))
-
-                            Text(
-                                text = "This is your MVP dashboard. More features like queue management, arcade locator, and community hub will be added soon!",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.8f)
-                            )
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(32.dp))
-
-                    // Logout button
-                    RhythmOutlinedButton(
-                        text = "Logout",
-                        onClick = {
-                            viewModel.logout()
-                            onLogout()
-                        }
-                    )
-                }
-            }
-        }
-    }
-}
-
-/**
- * Feature card component for displaying app features.
- *
- * @param title Feature title
- * @param description Feature description
- * @param icon Feature icon
- * @param enabled Whether the feature is enabled
- */
-@Composable
-private fun FeatureCard(
-    title: String,
-    description: String,
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
-    enabled: Boolean = true
-) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = if (enabled) {
-                MaterialTheme.colorScheme.surfaceVariant
-            } else {
-                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-            }
-        ),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = if (enabled) 4.dp else 2.dp
-        )
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(20.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = title,
-                modifier = Modifier.size(40.dp),
-                tint = if (enabled) {
-                    MaterialTheme.colorScheme.primary
+                        ) { CircularProgressIndicator(color = RhythmPink) }
                 } else {
-                    MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                        Column(
+                                modifier =
+                                        Modifier.fillMaxSize()
+                                                .verticalScroll(rememberScrollState())
+                                                .padding(16.dp)
+                        ) {
+                                // Top Header
+                                Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                        Column {
+                                                Text(
+                                                        text = "Welcome back,",
+                                                        style = MaterialTheme.typography.bodyMedium,
+                                                        color = TextSecondary
+                                                )
+                                                Text(
+                                                        text = uiState.user?.username
+                                                                        ?: "Rhythm Player",
+                                                        style =
+                                                                MaterialTheme.typography
+                                                                        .headlineMedium,
+                                                        fontWeight = FontWeight.Bold,
+                                                        color = TextPrimary
+                                                )
+                                        }
+                                        // Avatar
+                                        Box(
+                                                modifier =
+                                                        Modifier.size(56.dp)
+                                                                .clip(CircleShape)
+                                                                .background(
+                                                                        RhythmPink.copy(
+                                                                                alpha = 0.3f
+                                                                        )
+                                                                ),
+                                                contentAlignment = Alignment.Center
+                                        ) {
+                                                uiState.user?.let { user ->
+                                                        AsyncImage(
+                                                                model = user.getDisplayAvatarUrl(),
+                                                                contentDescription = "Avatar",
+                                                                modifier =
+                                                                        Modifier.size(56.dp)
+                                                                                .clip(CircleShape),
+                                                                contentScale = ContentScale.Crop
+                                                        )
+                                                }
+                                        }
+                                }
+
+                                Spacer(Modifier.height(24.dp))
+
+                                // Level & XP Card
+                                uiState.user?.let { user ->
+                                        NeonCard(
+                                                glowColor = RhythmCyan,
+                                                modifier = Modifier.fillMaxWidth()
+                                        ) {
+                                                Column(modifier = Modifier.padding(16.dp)) {
+                                                        Row(
+                                                                modifier = Modifier.fillMaxWidth(),
+                                                                horizontalArrangement =
+                                                                        Arrangement.SpaceBetween,
+                                                                verticalAlignment =
+                                                                        Alignment.CenterVertically
+                                                        ) {
+                                                                Text(
+                                                                        text =
+                                                                                "Level ${user.level}",
+                                                                        style =
+                                                                                MaterialTheme
+                                                                                        .typography
+                                                                                        .titleLarge,
+                                                                        fontWeight =
+                                                                                FontWeight.Bold,
+                                                                        color = RhythmCyan
+                                                                )
+                                                                StatusChip(
+                                                                        text = "Rhythm Player",
+                                                                        color = RhythmPink
+                                                                )
+                                                        }
+                                                        Spacer(Modifier.height(12.dp))
+                                                        val levelThreshold = user.level * 100
+                                                        val progress =
+                                                                (user.xp.toFloat() /
+                                                                                levelThreshold
+                                                                                        .toFloat())
+                                                                        .coerceIn(0f, 1f)
+                                                        LinearProgressIndicator(
+                                                                progress = { progress },
+                                                                modifier =
+                                                                        Modifier.fillMaxWidth()
+                                                                                .height(10.dp)
+                                                                                .clip(
+                                                                                        RoundedCornerShape(
+                                                                                                5.dp
+                                                                                        )
+                                                                                ),
+                                                                color = RhythmCyan,
+                                                                trackColor = SurfaceDark
+                                                        )
+                                                        Spacer(Modifier.height(6.dp))
+                                                        Text(
+                                                                text =
+                                                                        "${user.xp} / $levelThreshold XP to level ${user.level + 1}",
+                                                                style =
+                                                                        MaterialTheme.typography
+                                                                                .bodySmall,
+                                                                color = TextSecondary
+                                                        )
+                                                }
+                                        }
+                                }
+
+                                Spacer(Modifier.height(24.dp))
+
+                                // Quick Actions
+                                SectionHeader(title = "Quick Actions")
+                                Spacer(Modifier.height(12.dp))
+
+                                Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                ) {
+                                        QuickActionCard(
+                                                icon = Icons.Default.QueuePlayNext,
+                                                title = "Find Arcade",
+                                                subtitle = "View queues",
+                                                modifier = Modifier.weight(1f),
+                                                onClick = onNavigateToArcades
+                                        )
+                                        QuickActionCard(
+                                                icon = Icons.Default.People,
+                                                title = "Community",
+                                                subtitle = "See posts",
+                                                modifier = Modifier.weight(1f),
+                                                onClick = onNavigateToCommunity
+                                        )
+                                }
+
+                                Spacer(Modifier.height(24.dp))
+
+                                // Tips Card
+                                GlassCard(modifier = Modifier.fillMaxWidth()) {
+                                        Column(Modifier.padding(16.dp)) {
+                                                Row(
+                                                        verticalAlignment =
+                                                                Alignment.CenterVertically
+                                                ) {
+                                                        Icon(
+                                                                Icons.Default.Lightbulb,
+                                                                contentDescription = null,
+                                                                tint = RhythmYellow
+                                                        )
+                                                        Spacer(Modifier.width(8.dp))
+                                                        Text(
+                                                                "Pro Tip",
+                                                                fontWeight = FontWeight.Bold,
+                                                                color = RhythmYellow
+                                                        )
+                                                }
+                                                Spacer(Modifier.height(8.dp))
+                                                Text(
+                                                        text =
+                                                                "Check in at an arcade to earn +50 XP! The queue system is community-driven, so be a good sport and update your status.",
+                                                        style = MaterialTheme.typography.bodyMedium,
+                                                        color = TextSecondary
+                                                )
+                                        }
+                                }
+
+                                Spacer(Modifier.height(32.dp))
+
+                                // Logout
+                                RhythmOutlinedButton(
+                                        text = "Logout",
+                                        onClick = {
+                                                viewModel.logout()
+                                                onLogout()
+                                        }
+                                )
+                                Spacer(Modifier.height(24.dp))
+                        }
                 }
-            )
-
-            Spacer(modifier = Modifier.width(16.dp))
-
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = if (enabled) {
-                        MaterialTheme.colorScheme.onSurfaceVariant
-                    } else {
-                        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
-                    }
-                )
-
-                Text(
-                    text = if (enabled) description else "Coming soon",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = if (enabled) {
-                        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-                    } else {
-                        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
-                    }
-                )
-            }
         }
-    }
 }
 
+@Composable
+fun QuickActionCard(
+        icon: ImageVector,
+        title: String,
+        subtitle: String,
+        modifier: Modifier = Modifier,
+        onClick: () -> Unit
+) {
+        Card(
+                onClick = onClick,
+                modifier = modifier.height(100.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = SurfaceDark)
+        ) {
+                Column(
+                        modifier = Modifier.fillMaxSize().padding(12.dp),
+                        verticalArrangement = Arrangement.Center
+                ) {
+                        Icon(
+                                icon,
+                                contentDescription = null,
+                                tint = RhythmPink,
+                                modifier = Modifier.size(28.dp)
+                        )
+                        Spacer(Modifier.height(8.dp))
+                        Text(
+                                title,
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = TextPrimary
+                        )
+                        Text(
+                                subtitle,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = TextSecondary
+                        )
+                }
+        }
+}

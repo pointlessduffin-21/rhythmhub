@@ -69,18 +69,18 @@ class UserRepository(private val context: Context) {
                     try {
                         val localBio = getBio(username) // Fallback to local
                         val user =
-                            User(
-                                id = snapshot.id,
-                                username = snapshot.getString("username") ?: username,
-                                email = snapshot.getString("email") ?: "",
-                                xp = snapshot.getLong("xp")?.toInt() ?: 0,
-                                level = snapshot.getLong("level")?.toInt() ?: 1,
-                                trustScore = snapshot.getDouble("trustScore")?.toFloat()
-                                    ?: 1.0f,
-                                bio = snapshot.getString("bio") ?: localBio,
-                                isAdmin = snapshot.getBoolean("isAdmin") ?: false,
-                                avatarUrl = snapshot.getString("avatarUrl") ?: ""
-                            )
+                                User(
+                                        id = snapshot.id,
+                                        username = snapshot.getString("username") ?: username,
+                                        email = snapshot.getString("email") ?: "",
+                                        xp = snapshot.getLong("xp")?.toInt() ?: 0,
+                                        level = snapshot.getLong("level")?.toInt() ?: 1,
+                                        trustScore = snapshot.getDouble("trustScore")?.toFloat()
+                                                        ?: 1.0f,
+                                        bio = snapshot.getString("bio") ?: localBio,
+                                        isAdmin = snapshot.getBoolean("isAdmin") ?: false,
+                                        avatarUrl = snapshot.getString("avatarUrl") ?: ""
+                                )
                         _currentUser.value = user
                     } catch (ex: Exception) {
                         Log.e("UserRepo", "Error parsing user", ex)
@@ -185,5 +185,34 @@ class UserRepository(private val context: Context) {
     suspend fun setOnboardingCompleted() {
         dataStore.edit { it[IS_FIRST_LAUNCH_KEY] = false }
     }
-}
 
+    /**
+     * Add XP to the current user. Updates both local state and Firestore. Also calculates level
+     * based on XP thresholds.
+     */
+    fun addXp(amount: Int) {
+        val user = _currentUser.value ?: return
+        val newXp = user.xp + amount
+        val newLevel = calculateLevel(newXp)
+
+        // Update local state immediately for responsive UI
+        _currentUser.value = user.copy(xp = newXp, level = newLevel)
+
+        // Update Firestore
+        scope.launch {
+            try {
+                firestore
+                        .collection("users")
+                        .document(user.username)
+                        .update(mapOf("xp" to newXp, "level" to newLevel))
+            } catch (e: Exception) {
+                Log.e("UserRepo", "Failed to update XP in Firestore", e)
+            }
+        }
+    }
+
+    /** Calculate level from XP. Every 100 XP = 1 level. */
+    private fun calculateLevel(xp: Int): Int {
+        return (xp / 100) + 1
+    }
+}

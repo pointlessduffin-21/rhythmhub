@@ -30,6 +30,7 @@ import com.google.android.gms.location.LocationServices
 import edu.uc.intprog32.rhythmhub.data.model.Arcade
 import edu.uc.intprog32.rhythmhub.data.repository.UserRepository
 import edu.uc.intprog32.rhythmhub.presentation.components.GradientBackground
+import edu.uc.intprog32.rhythmhub.presentation.components.RhythmHeader
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("MissingPermission")
@@ -50,9 +51,18 @@ fun ArcadesScreen(
             rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
                     isGranted: Boolean ->
                 if (isGranted) {
-                    // Permission granted, user can retry check-in
+                    // Permission granted, user can now check in
                 }
             }
+
+    // Request location permission on screen load
+    LaunchedEffect(Unit) {
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) !=
+                        PackageManager.PERMISSION_GRANTED
+        ) {
+            requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+        }
+    }
 
     // Show Toast on Check-In Result
     LaunchedEffect(checkInResult) {
@@ -62,27 +72,16 @@ fun ArcadesScreen(
         }
     }
 
-    Scaffold(
-            topBar = {
-                TopAppBar(
-                        title = { Text("Arcade Locator") },
-                        colors =
-                                TopAppBarDefaults.topAppBarColors(
-                                        containerColor = MaterialTheme.colorScheme.primary,
-                                        titleContentColor = MaterialTheme.colorScheme.onPrimary
-                                )
-                )
-            }
-    ) { paddingValues ->
-        GradientBackground {
+    GradientBackground {
+        Column(modifier = Modifier.fillMaxSize()) {
+            // Premium Header
+            RhythmHeader(title = "Arcade Locator")
+
             // Group arcades by City
             val groupedArcades = arcades.groupBy { it.city }
 
             LazyColumn(
-                    modifier =
-                            Modifier.fillMaxSize()
-                                    .padding(paddingValues)
-                                    .padding(horizontal = 16.dp),
+                    modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
                     contentPadding = PaddingValues(vertical = 16.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
@@ -205,4 +204,3 @@ fun InfoTag(icon: androidx.compose.ui.graphics.vector.ImageVector, text: String)
         )
     }
 }
-

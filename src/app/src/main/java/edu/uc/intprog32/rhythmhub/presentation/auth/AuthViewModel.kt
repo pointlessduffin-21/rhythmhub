@@ -23,79 +23,62 @@ import kotlinx.coroutines.launch
  * @property isSuccess Whether the operation was successful
  */
 data class AuthUiState(
-    val username: String = "",
-    val password: String = "",
-    val confirmPassword: String = "",
-    val bio: String = "",
-    val rememberMe: Boolean = false,
-    val isLoading: Boolean = false,
-    val errorMessage: String? = null,
-    val isSuccess: Boolean = false
+        val username: String = "",
+        val password: String = "",
+        val confirmPassword: String = "",
+        val bio: String = "",
+        val rememberMe: Boolean = true,
+        val isLoading: Boolean = false,
+        val errorMessage: String? = null,
+        val isSuccess: Boolean = false
 )
 
 /**
- * ViewModel for authentication operations (Login and Registration).
- * Manages UI state and communicates with UserRepository using SharedPreferences.
+ * ViewModel for authentication operations (Login and Registration). Manages UI state and
+ * communicates with UserRepository using SharedPreferences.
  *
- * This ViewModel implements MVVM pattern
- * It uses StateFlow to expose UI state to Compose screens and handles
- * authentication logic by delegating to the Repository layer.
+ * This ViewModel implements MVVM pattern It uses StateFlow to expose UI state to Compose screens
+ * and handles authentication logic by delegating to the Repository layer.
  *
  * @property userRepository Repository for user data operations
  */
-class AuthViewModel(
-    private val userRepository: UserRepository
-) : ViewModel() {
+class AuthViewModel(private val userRepository: UserRepository) : ViewModel() {
 
     private val _uiState = MutableStateFlow(AuthUiState())
     val uiState: StateFlow<AuthUiState> = _uiState.asStateFlow()
 
-
-    /**
-     * Updates the username field.
-     */
+    /** Updates the username field. */
     fun updateUsername(username: String) {
         _uiState.update { it.copy(username = username, errorMessage = null) }
     }
 
-    /**
-     * Updates the password field.
-     */
+    /** Updates the password field. */
     fun updatePassword(password: String) {
         _uiState.update { it.copy(password = password, errorMessage = null) }
     }
 
-    /**
-     * Updates the confirm password field.
-     */
+    /** Updates the confirm password field. */
     fun updateConfirmPassword(confirmPassword: String) {
         _uiState.update { it.copy(confirmPassword = confirmPassword, errorMessage = null) }
     }
 
-    /**
-     * Updates the bio field.
-     */
+    /** Updates the bio field. */
     fun updateBio(bio: String) {
         _uiState.update { it.copy(bio = bio, errorMessage = null) }
     }
 
-    /**
-     * Toggles the "Remember Me" checkbox.
-     */
+    /** Toggles the "Remember Me" checkbox. */
     fun toggleRememberMe() {
         _uiState.update { it.copy(rememberMe = !it.rememberMe) }
     }
 
-    /**
-     * Clears any error message.
-     */
+    /** Clears any error message. */
     fun clearError() {
         _uiState.update { it.copy(errorMessage = null) }
     }
 
     /**
-     * Performs user login.
-     * Validates credentials using SharedPreferences through the Repository.
+     * Performs user login. Validates credentials using SharedPreferences through the Repository.
      */
     fun login() {
         viewModelScope.launch {
@@ -103,19 +86,14 @@ class AuthViewModel(
 
             // Validation
             if (currentState.username.isBlank() || currentState.password.isBlank()) {
-                _uiState.update {
-                    it.copy(errorMessage = "Username and password are required")
-                }
+                _uiState.update { it.copy(errorMessage = "Username and password are required") }
                 return@launch
             }
 
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
 
             // Validate credentials
-            val isValid = userRepository.validateUser(
-                currentState.username,
-                currentState.password
-            )
+            val isValid = userRepository.validateUser(currentState.username, currentState.password)
 
             if (isValid) {
                 // Save current user and remember preference to SharedPreferences
@@ -123,28 +101,21 @@ class AuthViewModel(
                 userRepository.setRememberMe(currentState.rememberMe)
 
                 _uiState.update {
-                    it.copy(
-                        isLoading = false,
-                        isSuccess = true,
-                        errorMessage = null
-                    )
+                    it.copy(isLoading = false, isSuccess = true, errorMessage = null)
                 }
             } else {
                 _uiState.update {
                     it.copy(
-                        isLoading = false,
-                        isSuccess = false,
-                        errorMessage = "Invalid username or password"
+                            isLoading = false,
+                            isSuccess = false,
+                            errorMessage = "Invalid username or password"
                     )
                 }
             }
         }
     }
 
-    /**
-     * Performs user registration.
-     * Creates new user in SharedPreferences through the Repository.
-     */
+    /** Performs user registration. Creates new user in SharedPreferences through the Repository. */
     fun register() {
         viewModelScope.launch {
             val currentState = _uiState.value
@@ -161,9 +132,7 @@ class AuthViewModel(
             }
 
             if (currentState.password.length < 4) {
-                _uiState.update {
-                    it.copy(errorMessage = "Password must be at least 4 characters")
-                }
+                _uiState.update { it.copy(errorMessage = "Password must be at least 4 characters") }
                 return@launch
             }
 
@@ -175,42 +144,31 @@ class AuthViewModel(
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
 
             // Attempt to register user
-            val success = userRepository.registerUser(
-                currentState.username,
-                currentState.password
-            )
+            val success = userRepository.registerUser(currentState.username, currentState.password)
 
             if (success) {
                 userRepository.updateBio(currentState.username, currentState.bio)
                 _uiState.update {
-                    it.copy(
-                        isLoading = false,
-                        isSuccess = true,
-                        errorMessage = null
-                    )
+                    it.copy(isLoading = false, isSuccess = true, errorMessage = null)
                 }
             } else {
                 _uiState.update {
                     it.copy(
-                        isLoading = false,
-                        isSuccess = false,
-                        errorMessage = "Username already exists"
+                            isLoading = false,
+                            isSuccess = false,
+                            errorMessage = "Username already exists"
                     )
                 }
             }
         }
     }
 
-    /**
-     * Resets the UI state (useful when navigating between screens).
-     */
+    /** Resets the UI state (useful when navigating between screens). */
     fun resetState() {
         _uiState.value = AuthUiState()
     }
 
-    /**
-     * Factory for creating AuthViewModel with UserRepository dependency.
-     */
+    /** Factory for creating AuthViewModel with UserRepository dependency. */
     class Factory(private val userRepository: UserRepository) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
@@ -221,4 +179,3 @@ class AuthViewModel(
         }
     }
 }
-
